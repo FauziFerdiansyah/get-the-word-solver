@@ -75,7 +75,7 @@ export default function SettingsModal({ open, onClose }) {
           <div className="flex gap-2">
             <button
               onClick={() => handleLangSelect('id')}
-              className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all active:scale-95 text-lg"
+              className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all active:scale-95"
               style={{
                 borderColor: lang === 'id' ? theme.border : theme.border + '40',
                 backgroundColor: lang === 'id' ? theme.btnPrimary : theme.keyboard,
@@ -83,11 +83,11 @@ export default function SettingsModal({ open, onClose }) {
               }}
               title="Bahasa Indonesia"
             >
-              🇮🇩
+              <Icon icon="mdi:flag-indonesia" width={24} />
             </button>
             <button
               onClick={() => handleLangSelect('en')}
-              className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all active:scale-95 text-lg"
+              className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all active:scale-95"
               style={{
                 borderColor: lang === 'en' ? theme.border : theme.border + '40',
                 backgroundColor: lang === 'en' ? theme.btnSecondary : theme.keyboard,
@@ -95,7 +95,7 @@ export default function SettingsModal({ open, onClose }) {
               }}
               title="English"
             >
-              🇬🇧
+              <Icon icon="mdi:flag-uk" width={24} />
             </button>
           </div>
         </div>
