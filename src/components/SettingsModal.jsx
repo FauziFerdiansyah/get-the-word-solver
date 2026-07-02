@@ -195,6 +195,13 @@ export default function SettingsModal({ open, onClose }) {
             {t.colorblindNote}
           </p>
         )}
+
+        {/* Version Display */}
+        <div className="mt-6 pt-3 border-t text-center" style={{ borderColor: theme.border + '40' }}>
+          <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.textMuted }}>
+            Get the Word Solver v1.0.0
+          </p>
+        </div>
       </div>
     </div>
   );
