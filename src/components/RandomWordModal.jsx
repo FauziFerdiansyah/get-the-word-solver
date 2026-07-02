@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { gooeyToast } from 'goey-toast';
 
-export default function RandomWordModal({ open, onClose, words }) {
+export default function RandomWordModal({ open, onClose, words, wordLength }) {
   const { theme, t } = useTheme();
   const [displayWord, setDisplayWord] = useState('');
   const [shuffling, setShuffling] = useState(false);
@@ -9,8 +10,11 @@ export default function RandomWordModal({ open, onClose, words }) {
   const timeoutRef = useRef(null);
   const openedRef = useRef(false);
 
+  // Filter words to ensure correct length (safety check)
+  const filteredWords = (words || []).filter(w => w.length === wordLength);
+
   useEffect(() => {
-    if (!open || !words || words.length === 0) {
+    if (!open || filteredWords.length === 0) {
       openedRef.current = false;
       return;
     }
@@ -24,26 +28,36 @@ export default function RandomWordModal({ open, onClose, words }) {
     setShuffling(true);
 
     intervalRef.current = setInterval(() => {
-      const randomIdx = Math.floor(Math.random() * words.length);
-      setDisplayWord(words[randomIdx]);
+      const randomIdx = Math.floor(Math.random() * filteredWords.length);
+      setDisplayWord(filteredWords[randomIdx]);
       count++;
       if (count >= maxShuffles) {
         clearInterval(intervalRef.current);
-        const finalIdx = Math.floor(Math.random() * words.length);
-        setDisplayWord(words[finalIdx]);
+        const finalIdx = Math.floor(Math.random() * filteredWords.length);
+        setDisplayWord(filteredWords[finalIdx]);
         setShuffling(false);
       }
     }, 80);
 
+    // Auto-close after 8 seconds (was 5, added 3 more)
     timeoutRef.current = setTimeout(() => {
       onClose();
-    }, 5000);
+    }, 8000);
 
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(timeoutRef.current);
     };
-  }, [open, words, onClose]);
+  }, [open, filteredWords, onClose]);
+
+  const handleCopy = () => {
+    if (!displayWord || shuffling) return;
+    navigator.clipboard.writeText(displayWord).then(() => {
+      gooeyToast(`📋 "${displayWord}" ${t.copied}`, { duration: 1500 });
+    }).catch(() => {
+      gooeyToast('❌ Failed to copy', { duration: 1500 });
+    });
+  };
 
   if (!open) return null;
 
@@ -80,13 +94,30 @@ export default function RandomWordModal({ open, onClose, words }) {
           ))}
         </div>
 
+        {/* Copy button - visible when not shuffling */}
+        {!shuffling && displayWord && (
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-xs font-bold transition-all active:scale-95"
+            style={{
+              backgroundColor: theme.keyboard,
+              borderColor: theme.border,
+              color: theme.text,
+              boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
+            }}
+          >
+            📋 Salin Kata
+          </button>
+        )}
+
         {/* Countdown bar */}
         <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: theme.keyboard }}>
           <div
             className="h-full rounded-full"
             style={{
               backgroundColor: theme.green,
-              animation: 'shrink 5s linear forwards',
+              animation: 'shrink 8s linear forwards',
             }}
           />
         </div>
