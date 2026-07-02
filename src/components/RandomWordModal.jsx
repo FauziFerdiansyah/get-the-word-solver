@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { gooeyToast } from 'goey-toast';
 
@@ -9,15 +9,23 @@ export default function RandomWordModal({ open, onClose, words, wordLength }) {
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
   const openedRef = useRef(false);
+  const wordsRef = useRef([]);
+  const onCloseRef = useRef(onClose);
 
-  // Filter words to ensure correct length (safety check)
-  const filteredWords = (words || []).filter(w => w.length === wordLength);
+  // Keep refs updated
+  onCloseRef.current = onClose;
+  wordsRef.current = (words || []).filter(w => w.length === wordLength);
 
   useEffect(() => {
-    if (!open || filteredWords.length === 0) {
+    if (!open) {
       openedRef.current = false;
+      setDisplayWord('');
+      setShuffling(false);
       return;
     }
+
+    const validWords = wordsRef.current;
+    if (validWords.length === 0) return;
 
     // Only start shuffling once per open
     if (openedRef.current) return;
@@ -28,36 +36,36 @@ export default function RandomWordModal({ open, onClose, words, wordLength }) {
     setShuffling(true);
 
     intervalRef.current = setInterval(() => {
-      const randomIdx = Math.floor(Math.random() * filteredWords.length);
-      setDisplayWord(filteredWords[randomIdx]);
+      const randomIdx = Math.floor(Math.random() * validWords.length);
+      setDisplayWord(validWords[randomIdx]);
       count++;
       if (count >= maxShuffles) {
         clearInterval(intervalRef.current);
-        const finalIdx = Math.floor(Math.random() * filteredWords.length);
-        setDisplayWord(filteredWords[finalIdx]);
+        const finalIdx = Math.floor(Math.random() * validWords.length);
+        setDisplayWord(validWords[finalIdx]);
         setShuffling(false);
       }
     }, 80);
 
-    // Auto-close after 8 seconds (was 5, added 3 more)
+    // Auto-close after 8 seconds
     timeoutRef.current = setTimeout(() => {
-      onClose();
+      onCloseRef.current();
     }, 8000);
 
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(timeoutRef.current);
     };
-  }, [open, filteredWords, onClose]);
+  }, [open]);
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     if (!displayWord || shuffling) return;
     navigator.clipboard.writeText(displayWord).then(() => {
       gooeyToast(`📋 "${displayWord}" ${t.copied}`, { duration: 1500 });
     }).catch(() => {
       gooeyToast('❌ Failed to copy', { duration: 1500 });
     });
-  };
+  }, [displayWord, shuffling, t.copied]);
 
   if (!open) return null;
 
