@@ -28,27 +28,55 @@ export function findMatches(words, clues, colorStates, disabledLetters) {
       }
     }
 
-    // 2. Process each clue slot
+    // 2. Green clues: letters that must be at exact positions
+    const greenPositions = new Map(); // letter -> array of positions
     for (let i = 0; i < clues.length; i += 1) {
       const clue = clues[i];
-      if (!clue) continue; // Empty slot, skip
-
+      if (!clue) continue;
       const state = colorStates[i] || 'green';
-
       if (state === 'green') {
-        // Exact placement: letter must be at this position
         if (word[i] !== clue) {
           return false;
         }
-      } else if (state === 'yellow') {
-        // Letter must exist in the word but NOT at this position
+        if (!greenPositions.has(clue)) {
+          greenPositions.set(clue, []);
+        }
+        greenPositions.get(clue).push(i);
+      }
+    }
+
+    // 3. Yellow clues: letters that must exist but NOT at marked positions
+    const yellowConstraints = new Map(); // letter -> forbidden positions
+    for (let i = 0; i < clues.length; i += 1) {
+      const clue = clues[i];
+      if (!clue) continue;
+      const state = colorStates[i] || 'green';
+      if (state === 'yellow') {
         if (word[i] === clue) {
           return false; // Can't be at this exact spot
         }
-        if (!word.includes(clue)) {
-          return false; // Must exist somewhere in the word
+        if (!yellowConstraints.has(clue)) {
+          yellowConstraints.set(clue, []);
         }
+        yellowConstraints.get(clue).push(i);
       }
+    }
+
+    // 4. Verify all yellow letters exist in the word
+    for (const [letter, forbiddenPositions] of yellowConstraints) {
+      // Count occurrences of this letter in the word
+      const wordOccurrences = word.split('').filter(c => c === letter).length;
+      
+      // Count green occurrences of this letter
+      const greenOccurrences = greenPositions.get(letter)?.length || 0;
+      
+      // Must have at least (greenOccurrences + 1) instances to satisfy yellow
+      if (wordOccurrences < greenOccurrences + 1) {
+        return false;
+      }
+      
+      // Check that the yellow occurrences are not at forbidden positions
+      // (this is already checked above with word[i] === clue check)
     }
 
     return true;
