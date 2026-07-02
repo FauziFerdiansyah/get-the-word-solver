@@ -1,7 +1,7 @@
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function ConfirmModal({ open, message, onConfirm, onCancel }) {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
 
   if (!open) return null;
 
@@ -21,7 +21,7 @@ export default function ConfirmModal({ open, message, onConfirm, onCancel }) {
             className="flex-1 rounded-xl border-2 py-2 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
             style={{ backgroundColor: theme.card, borderColor: theme.border, color: theme.text, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
-            Batal
+            {t.cancel}
           </button>
           <button
             type="button"
@@ -29,7 +29,7 @@ export default function ConfirmModal({ open, message, onConfirm, onCancel }) {
             className="flex-1 rounded-xl border-2 py-2 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
             style={{ backgroundColor: theme.red, borderColor: theme.border, color: '#ffffff', boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
-            Ya, Reset
+            {t.yesReset}
           </button>
         </div>
       </div>

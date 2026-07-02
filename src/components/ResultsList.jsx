@@ -80,7 +80,7 @@ function WordItem({ word, showDefinition }) {
 }
 
 export default function ResultsList({ results, visibleCount, onShowMore, hasSearched, showDefinition }) {
-  const { theme } = useTheme();
+  const { theme, t } = useTheme();
   const visibleResults = results.slice(0, visibleCount);
   const hasMore = visibleCount < results.length;
 
@@ -94,7 +94,7 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
         className="rounded-xl border-2 p-4 text-center text-sm font-semibold"
         style={{ backgroundColor: '#fce8e8', borderColor: theme.border, color: theme.text, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
       >
-        Tidak ada kata yang cocok. Coba ubah clue atau huruf yang dicoret.
+        {t.noMatch}
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-sm" style={{ color: theme.textMuted }}>
-          Ditemukan <span className="font-extrabold text-base" style={{ color: theme.text }}>{results.length}</span> kata cocok
+          {t.found} <span className="font-extrabold text-base" style={{ color: theme.text }}>{results.length}</span> {t.matchWords}
         </p>
         <button
           onClick={handleCopyAll}
@@ -124,7 +124,7 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
           style={{ borderColor: theme.border, color: theme.text, backgroundColor: theme.card, boxShadow: `2px 2px 0px 0px ${theme.shadow}` }}
         >
           <Icon icon="tabler:clipboard-list" width={14} />
-          Salin Semua
+          {t.copyAll}
         </button>
       </div>
       <ul className="flex flex-col gap-2">
@@ -145,7 +145,7 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
           }}
         >
           <Icon icon="tabler:chevrons-down" width={18} />
-          Tampilkan Lainnya
+          {t.showMore}
         </button>
       )}
     </div>

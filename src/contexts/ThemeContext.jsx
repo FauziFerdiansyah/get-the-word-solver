@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { THEMES } from '../data/themes';
+import { LANG } from '../data/i18n';
 
 const ThemeContext = createContext();
 
@@ -8,28 +9,16 @@ export function ThemeProvider({ children }) {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ws-dark') === 'true');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('ws-sound') !== 'false');
   const [showDefinition, setShowDefinition] = useState(() => localStorage.getItem('ws-def') === 'true');
+  const [lang, setLang] = useState(() => localStorage.getItem('ws-lang') || 'id');
 
-  useEffect(() => {
-    localStorage.setItem('ws-theme', themeName);
-  }, [themeName]);
-
-  useEffect(() => {
-    localStorage.setItem('ws-dark', darkMode);
-  }, [darkMode]);
-
-  useEffect(() => {
-    localStorage.setItem('ws-sound', soundEnabled);
-  }, [soundEnabled]);
-
-  useEffect(() => {
-    localStorage.setItem('ws-def', showDefinition);
-  }, [showDefinition]);
+  useEffect(() => { localStorage.setItem('ws-theme', themeName); }, [themeName]);
+  useEffect(() => { localStorage.setItem('ws-dark', darkMode); }, [darkMode]);
+  useEffect(() => { localStorage.setItem('ws-sound', soundEnabled); }, [soundEnabled]);
+  useEffect(() => { localStorage.setItem('ws-def', showDefinition); }, [showDefinition]);
+  useEffect(() => { localStorage.setItem('ws-lang', lang); }, [lang]);
 
   const theme = THEMES[themeName] || THEMES.mint;
 
-  // Dark mode overrides — keep the theme's accent colors (green, yellow, red)
-  // but swap backgrounds/text for dark readability.
-  // Neo-brutalism: borders & shadows become light/white in dark mode for contrast.
   const resolvedTheme = darkMode && themeName !== 'colorblind'
     ? {
         ...theme,
@@ -48,8 +37,16 @@ export function ThemeProvider({ children }) {
       }
     : theme;
 
+  const t = LANG[lang] || LANG.id;
+
   return (
-    <ThemeContext.Provider value={{ theme: resolvedTheme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled, showDefinition, setShowDefinition }}>
+    <ThemeContext.Provider value={{
+      theme: resolvedTheme, themeName, setThemeName,
+      darkMode, setDarkMode,
+      soundEnabled, setSoundEnabled,
+      showDefinition, setShowDefinition,
+      lang, setLang, t,
+    }}>
       {children}
     </ThemeContext.Provider>
   );

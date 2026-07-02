@@ -6,31 +6,37 @@ import { gooeyToast } from 'goey-toast';
 const themeKeys = Object.keys(THEMES);
 
 export default function SettingsModal({ open, onClose }) {
-  const { theme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled, showDefinition, setShowDefinition } = useTheme();
+  const { theme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled, showDefinition, setShowDefinition, lang, setLang, t } = useTheme();
 
   if (!open) return null;
 
   const handleThemeChange = (key) => {
     setThemeName(key);
-    gooeyToast(`Tema "${THEMES[key].name}" diterapkan`, { duration: 1500 });
+    gooeyToast(`${THEMES[key].name} ✓`, { duration: 1500 });
   };
 
   const handleDarkToggle = () => {
     const next = !darkMode;
     setDarkMode(next);
-    gooeyToast(next ? 'Dark mode aktif' : 'Light mode aktif', { duration: 1500 });
+    gooeyToast(next ? 'Dark mode ✓' : 'Light mode ✓', { duration: 1500 });
   };
 
   const handleSoundToggle = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
-    gooeyToast(next ? 'Sound effect aktif 🔊' : 'Sound effect mati 🔇', { duration: 1500 });
+    gooeyToast(next ? '🔊 ON' : '🔇 OFF', { duration: 1500 });
   };
 
   const handleDefToggle = () => {
     const next = !showDefinition;
     setShowDefinition(next);
-    gooeyToast(next ? 'Arti kata ditampilkan 📖' : 'Arti kata disembunyikan', { duration: 1500 });
+    gooeyToast(next ? '📖 ON' : '📖 OFF', { duration: 1500 });
+  };
+
+  const handleLangToggle = () => {
+    const next = lang === 'id' ? 'en' : 'id';
+    setLang(next);
+    gooeyToast(next === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English', { duration: 1500 });
   };
 
   return (
@@ -46,31 +52,39 @@ export default function SettingsModal({ open, onClose }) {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-extrabold" style={{ color: theme.text }}>
-            Pengaturan
+            {t.settings}
           </h2>
           <button onClick={onClose} className="p-1 rounded-lg active:scale-90 transition-transform">
             <Icon icon="tabler:x" width={22} style={{ color: theme.text }} />
           </button>
         </div>
 
+        {/* Language Toggle */}
+        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
+            <Icon icon="tabler:language" width={18} />
+            {t.language}
+          </span>
+          <button
+            onClick={handleLangToggle}
+            className="px-3 py-1.5 rounded-lg border-2 text-xs font-bold active:scale-95 transition-transform"
+            style={{ borderColor: theme.border, color: theme.text, backgroundColor: theme.keyboard }}
+          >
+            {lang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN'}
+          </button>
+        </div>
+
         {/* Dark Mode Toggle */}
         <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
-          <span className="text-sm font-semibold" style={{ color: theme.text }}>Dark Mode</span>
+          <span className="text-sm font-semibold" style={{ color: theme.text }}>{t.darkMode}</span>
           <button
             onClick={handleDarkToggle}
             className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
-            style={{
-              borderColor: theme.border,
-              backgroundColor: darkMode ? theme.green : theme.keyboard,
-            }}
+            style={{ borderColor: theme.border, backgroundColor: darkMode ? theme.green : theme.keyboard }}
           >
             <span
               className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
-              style={{
-                backgroundColor: theme.card,
-                border: `2px solid ${theme.border}`,
-                left: darkMode ? '22px' : '2px',
-              }}
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: darkMode ? '22px' : '2px' }}
             />
           </button>
         </div>
@@ -79,23 +93,16 @@ export default function SettingsModal({ open, onClose }) {
         <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
           <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
             <Icon icon={soundEnabled ? 'tabler:volume' : 'tabler:volume-off'} width={18} />
-            Sound Effect
+            {t.soundEffect}
           </span>
           <button
             onClick={handleSoundToggle}
             className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
-            style={{
-              borderColor: theme.border,
-              backgroundColor: soundEnabled ? theme.green : theme.keyboard,
-            }}
+            style={{ borderColor: theme.border, backgroundColor: soundEnabled ? theme.green : theme.keyboard }}
           >
             <span
               className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
-              style={{
-                backgroundColor: theme.card,
-                border: `2px solid ${theme.border}`,
-                left: soundEnabled ? '22px' : '2px',
-              }}
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: soundEnabled ? '22px' : '2px' }}
             />
           </button>
         </div>
@@ -104,33 +111,26 @@ export default function SettingsModal({ open, onClose }) {
         <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
           <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
             <Icon icon="tabler:book" width={18} />
-            Tampilkan Arti Kata
+            {t.showDef}
           </span>
           <button
             onClick={handleDefToggle}
             className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
-            style={{
-              borderColor: theme.border,
-              backgroundColor: showDefinition ? theme.green : theme.keyboard,
-            }}
+            style={{ borderColor: theme.border, backgroundColor: showDefinition ? theme.green : theme.keyboard }}
           >
             <span
               className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
-              style={{
-                backgroundColor: theme.card,
-                border: `2px solid ${theme.border}`,
-                left: showDefinition ? '22px' : '2px',
-              }}
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: showDefinition ? '22px' : '2px' }}
             />
           </button>
         </div>
 
         {/* Theme Selector */}
         <div className="mt-4">
-          <h3 className="text-sm font-bold mb-3" style={{ color: theme.text }}>Pilih Tema</h3>
+          <h3 className="text-sm font-bold mb-3" style={{ color: theme.text }}>{t.chooseTheme}</h3>
           <div className="flex flex-col gap-2">
             {themeKeys.map((key) => {
-              const t = THEMES[key];
+              const themeOption = THEMES[key];
               const isActive = key === themeName;
               return (
                 <button
@@ -142,17 +142,16 @@ export default function SettingsModal({ open, onClose }) {
                     backgroundColor: isActive ? theme.accent : 'transparent',
                   }}
                 >
-                  {/* Color preview dots */}
                   <div className="flex gap-1">
-                    <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: t.green, borderColor: t.border + '60' }} />
-                    <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: t.yellow, borderColor: t.border + '60' }} />
-                    <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: t.disabled, borderColor: t.border + '60' }} />
+                    <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: themeOption.green, borderColor: theme.border + '60' }} />
+                    <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: themeOption.yellow, borderColor: theme.border + '60' }} />
+                    <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: themeOption.disabled, borderColor: theme.border + '60' }} />
                   </div>
                   <span className="text-sm font-semibold" style={{ color: theme.text }}>
-                    {t.name}
+                    {themeOption.name}
                   </span>
                   {key === 'colorblind' && (
-                    <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: t.green, color: '#fff' }}>
+                    <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: themeOption.green, color: '#fff' }}>
                       A11Y
                     </span>
                   )}
@@ -167,11 +166,10 @@ export default function SettingsModal({ open, onClose }) {
 
         {themeName === 'colorblind' && (
           <p className="mt-3 text-xs p-2 rounded-lg" style={{ color: theme.textMuted, backgroundColor: theme.accent }}>
-            Tema ini menggunakan biru & oranye sebagai pengganti hijau & kuning agar lebih mudah dibedakan oleh penderita buta warna.
+            {t.colorblindNote}
           </p>
         )}
       </div>
     </div>
   );
 }
-

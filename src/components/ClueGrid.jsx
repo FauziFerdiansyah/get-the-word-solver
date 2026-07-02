@@ -3,7 +3,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { playKeySound, playErrorSound } from '../utils/sound';
 
 export default function ClueGrid({ clues, colorStates, onChange, onColorToggle, disabledLetters }) {
-  const { theme, soundEnabled } = useTheme();
+  const { theme, soundEnabled, t } = useTheme();
   const inputRefs = useRef([]);
   const [blinkIndex, setBlinkIndex] = useState(null);
 
@@ -60,11 +60,11 @@ export default function ClueGrid({ clues, colorStates, onChange, onColorToggle, 
       <div className="flex items-center justify-center gap-4 text-[11px] font-semibold" style={{ color: theme.textMuted }}>
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3.5 h-3.5 rounded-md border" style={{ backgroundColor: theme.green, borderColor: theme.border + '60' }} />
-          Posisi benar
+          {t.legendCorrect}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3.5 h-3.5 rounded-md border" style={{ backgroundColor: theme.yellow, borderColor: theme.border + '60' }} />
-          Salah posisi
+          {t.legendWrong}
         </span>
       </div>
 
@@ -112,7 +112,7 @@ export default function ClueGrid({ clues, colorStates, onChange, onColorToggle, 
       </div>
 
       <p className="text-[10px] text-center" style={{ color: theme.textMuted }}>
-        Tap bulatan kecil di pojok kotak untuk ubah warna
+        {t.legendHint}
       </p>
     </div>
   );

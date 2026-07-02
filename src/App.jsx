@@ -11,6 +11,7 @@ import ResultsList, { PAGE_SIZE } from './components/ResultsList';
 import ConfirmModal from './components/ConfirmModal';
 import SettingsModal from './components/SettingsModal';
 import CoachMark from './components/CoachMark';
+import RandomWordModal from './components/RandomWordModal';
 import { WORD_LISTS } from './data/words';
 import { findMatches } from './utils/solver';
 
@@ -18,7 +19,7 @@ const emptyClues = (length) => Array.from({ length }, () => '');
 const emptyColors = (length) => Array.from({ length }, () => 'green');
 
 export default function App() {
-  const { theme, soundEnabled, showDefinition } = useTheme();
+  const { theme, soundEnabled, showDefinition, t } = useTheme();
   const [wordLength, setWordLength] = useState(5);
   const [clues, setClues] = useState(emptyClues(5));
   const [colorStates, setColorStates] = useState(emptyColors(5));
@@ -29,6 +30,7 @@ export default function App() {
   const [pendingLength, setPendingLength] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
+  const [showRandom, setShowRandom] = useState(false);
 
   const hasFilledFields = () =>
     clues.some((c) => c !== '') || disabledLetters.size > 0;
@@ -114,16 +116,6 @@ export default function App() {
     setHasSearched(false);
   };
 
-  const handleRandomWord = () => {
-    const words = WORD_LISTS[wordLength] || [];
-    if (words.length === 0) return;
-    const random = words[Math.floor(Math.random() * words.length)];
-    // Fill clue grid with the random word
-    setClues(random.split(''));
-    setColorStates(Array.from({ length: wordLength }, () => 'green'));
-  };
-
-  // Is the state "fresh" (nothing filled)?
   const isFresh = clues.every((c) => c === '') && disabledLetters.size === 0 && !hasSearched;
 
   const handleShowMore = () => {
@@ -164,19 +156,18 @@ export default function App() {
         </button>
       </div>
 
-      {/* Main layout: desktop 50-50, mobile stacked */}
+      {/* Main layout */}
       <div className="w-full max-w-5xl mx-auto px-4 py-6 flex flex-col lg:flex-row lg:gap-8 lg:items-start lg:py-10">
-        {/* Left panel: solver input */}
+        {/* Left panel */}
         <div className="w-full lg:w-1/2 flex flex-col gap-5">
-          {/* Header with logo */}
           <header className="flex items-center gap-3">
             <img src="./word.png" alt="Logo" className="w-10 h-10 rounded-lg" />
             <div>
               <h1 className="text-xl font-extrabold" style={{ color: theme.text }}>
-                Wordle Solver
+                {t.appTitle}
               </h1>
               <p className="text-xs font-medium" style={{ color: theme.textMuted }}>
-                Cari jawaban Wordle / Get the Word
+                {t.appSubtitle}
               </p>
             </div>
           </header>
@@ -188,7 +179,7 @@ export default function App() {
             style={{ backgroundColor: theme.accent, borderColor: theme.border, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
             <h2 className="text-sm font-bold text-center" style={{ color: theme.text }}>
-              Clue Kata ({wordLength} Huruf)
+              {t.clueTitle} ({wordLength} {t.letters})
             </h2>
             <ClueGrid
               clues={clues}
@@ -204,7 +195,7 @@ export default function App() {
             style={{ backgroundColor: theme.accent2, borderColor: theme.border, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
             <h2 className="text-sm font-bold text-center" style={{ color: theme.text }}>
-              Coret Huruf yang Tidak Ada
+              {t.crossTitle}
             </h2>
             <Keyboard disabledLetters={disabledLetters} letterColors={letterColors} onToggle={handleToggleLetter} />
           </section>
@@ -216,7 +207,7 @@ export default function App() {
               className="flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
               style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: '#1e293b', boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
             >
-              Cari Jawaban
+              {t.search}
             </button>
             <button
               type="button"
@@ -224,20 +215,19 @@ export default function App() {
               className="flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
               style={{ backgroundColor: theme.btnSecondary, borderColor: theme.border, color: '#1e293b', boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
             >
-              Reset
+              {t.reset}
             </button>
           </div>
 
-          {/* Random word button — only visible when fresh */}
           {isFresh && (
             <button
               type="button"
-              onClick={handleRandomWord}
+              onClick={() => setShowRandom(true)}
               className="flex items-center justify-center gap-2 w-full rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
               style={{ backgroundColor: theme.keyboard, borderColor: theme.border, color: theme.text, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
             >
               <Icon icon="tabler:dice-3" width={18} />
-              Acak Kata
+              {t.randomWord}
             </button>
           )}
         </div>
@@ -256,13 +246,19 @@ export default function App() {
 
       <ConfirmModal
         open={pendingLength !== null}
-        message="Mengganti level akan mereset clue dan huruf yang sudah diisi. Lanjutkan?"
+        message={t.confirmReset}
         onConfirm={confirmLevelChange}
         onCancel={cancelLevelChange}
       />
 
       <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
       <CoachMark open={showCoach} onClose={() => setShowCoach(false)} />
+      <RandomWordModal
+        open={showRandom}
+        onClose={() => setShowRandom(false)}
+        wordLength={wordLength}
+        words={WORD_LISTS[wordLength] || []}
+      />
     </div>
   );
 }
