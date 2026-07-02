@@ -20,6 +20,15 @@ function shuffle(arr) {
 }
 
 export function findMatches(words, clues, colorStates, disabledLetters) {
+  // Pre-calculate minimum required count for each letter
+  // If a letter appears multiple times in clues (green or yellow), the word must have at least that many
+  const minLetterCount = new Map();
+  for (let i = 0; i < clues.length; i += 1) {
+    const clue = clues[i];
+    if (!clue) continue;
+    minLetterCount.set(clue, (minLetterCount.get(clue) || 0) + 1);
+  }
+
   const matches = words.filter((word) => {
     // 1. Disabled letters must not appear anywhere in the word.
     for (let i = 0; i < word.length; i += 1) {
@@ -28,8 +37,16 @@ export function findMatches(words, clues, colorStates, disabledLetters) {
       }
     }
 
-    // 2. Check green constraints (exact position matches)
-    const greenLetters = new Map(); // letter -> array of positions
+    // 2. Check minimum letter count requirement
+    // If user entered same letter multiple times, word must have at least that many
+    for (const [letter, minCount] of minLetterCount) {
+      const actualCount = (word.match(new RegExp(letter, 'g')) || []).length;
+      if (actualCount < minCount) {
+        return false;
+      }
+    }
+
+    // 3. Check green constraints (exact position matches)
     for (let i = 0; i < clues.length; i += 1) {
       const clue = clues[i];
       if (!clue) continue;
@@ -38,33 +55,21 @@ export function findMatches(words, clues, colorStates, disabledLetters) {
         if (word[i] !== clue) {
           return false;
         }
-        if (!greenLetters.has(clue)) {
-          greenLetters.set(clue, []);
-        }
-        greenLetters.get(clue).push(i);
       }
     }
 
-    // 3. Check yellow constraints (letter exists but NOT at this position)
-    const yellowLetters = new Map(); // letter -> array of forbidden positions
+    // 4. Check yellow constraints (letter exists but NOT at this position)
     for (let i = 0; i < clues.length; i += 1) {
       const clue = clues[i];
       if (!clue) continue;
       const state = colorStates[i] || 'green';
       if (state === 'yellow') {
         // The letter at this position is yellow, meaning:
-        // - The letter MUST exist somewhere in the word
+        // - The letter MUST exist somewhere in the word (already checked in step 2)
         // - But NOT at this exact position
         if (word[i] === clue) {
           return false; // Reject if letter is at this position
         }
-        if (!word.includes(clue)) {
-          return false; // Reject if letter doesn't exist at all
-        }
-        if (!yellowLetters.has(clue)) {
-          yellowLetters.set(clue, []);
-        }
-        yellowLetters.get(clue).push(i);
       }
     }
 
