@@ -1,0 +1,21 @@
+{
+  "name": "Get the Word Solver",
+  "short_name": "Word Solver",
+  "description": "Solve Wordle & Get the Word puzzles instantly",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "./word.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./word.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

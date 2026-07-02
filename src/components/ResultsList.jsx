@@ -1,9 +1,85 @@
+import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { gooeyToast } from 'goey-toast';
 import { useTheme } from '../contexts/ThemeContext';
+import { getDefinition } from '../utils/dictionary';
 
 const PAGE_SIZE = 5;
 
-export default function ResultsList({ results, visibleCount, onShowMore, hasSearched }) {
+function WordItem({ word, showDefinition }) {
+  const { theme } = useTheme();
+  const [def, setDef] = useState(null);
+
+  useEffect(() => {
+    if (!showDefinition) return;
+    let cancelled = false;
+    const fetchDef = async () => {
+      const result = await getDefinition(word);
+      if (!cancelled) {
+        setDef(result);
+      }
+    };
+    fetchDef();
+    return () => { cancelled = true; };
+  }, [word, showDefinition]);
+
+  const displayDef = showDefinition ? def : null;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(word).then(() => {
+      gooeyToast(`"${word}" disalin`, { duration: 1000 });
+    });
+  };
+
+  return (
+    <li
+      className="rounded-xl border-2 px-4 py-3 flex flex-col gap-1"
+      style={{
+        backgroundColor: theme.accent,
+        borderColor: theme.border,
+        boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-bold tracking-widest" style={{ color: theme.text }}>
+          {word}
+        </span>
+        <button
+          onClick={handleCopy}
+          className="p-1.5 rounded-lg border active:scale-90 transition-transform"
+          style={{ borderColor: theme.border + '60' }}
+          aria-label={`Salin ${word}`}
+        >
+          <Icon icon="tabler:copy" width={16} style={{ color: theme.textMuted }} />
+        </button>
+      </div>
+      {showDefinition && displayDef && (
+        <div className="mt-1">
+          {displayDef.phonetic && (
+            <span className="text-xs italic mr-2" style={{ color: theme.textMuted }}>
+              {displayDef.phonetic}
+            </span>
+          )}
+          {displayDef.partOfSpeech && (
+            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ backgroundColor: theme.keyboard, color: theme.text }}>
+              {displayDef.partOfSpeech}
+            </span>
+          )}
+          {displayDef.definition && (
+            <p className="text-xs mt-1 leading-relaxed" style={{ color: theme.textMuted }}>
+              {displayDef.definition}
+            </p>
+          )}
+        </div>
+      )}
+      {showDefinition && !displayDef && !def && (
+        <p className="text-[10px] mt-1" style={{ color: theme.textMuted }}>Loading...</p>
+      )}
+    </li>
+  );
+}
+
+export default function ResultsList({ results, visibleCount, onShowMore, hasSearched, showDefinition }) {
   const { theme } = useTheme();
   const visibleResults = results.slice(0, visibleCount);
   const hasMore = visibleCount < results.length;
@@ -23,25 +99,37 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
     );
   }
 
+  const handleCopyAll = () => {
+    const max = 20;
+    const wordsToCopy = results.slice(0, max);
+    const text = wordsToCopy.map(w => `- ${w}`).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      if (results.length > max) {
+        gooeyToast(`Disalin ${max} kata (maksimal). Total ada ${results.length} kata.`, { duration: 2000 });
+      } else {
+        gooeyToast(`Disalin ${wordsToCopy.length} kata`, { duration: 1500 });
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-center text-sm" style={{ color: theme.textMuted }}>
-        Ditemukan <span className="font-extrabold text-base" style={{ color: theme.text }}>{results.length}</span> kata cocok
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm" style={{ color: theme.textMuted }}>
+          Ditemukan <span className="font-extrabold text-base" style={{ color: theme.text }}>{results.length}</span> kata cocok
+        </p>
+        <button
+          onClick={handleCopyAll}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg border-2 text-xs font-bold active:scale-95 transition-transform"
+          style={{ borderColor: theme.border, color: theme.text, backgroundColor: theme.card, boxShadow: `2px 2px 0px 0px ${theme.shadow}` }}
+        >
+          <Icon icon="tabler:clipboard-list" width={14} />
+          Salin Semua
+        </button>
+      </div>
       <ul className="flex flex-col gap-2">
         {visibleResults.map((word) => (
-          <li
-            key={word}
-            className="rounded-xl border-2 px-4 py-2 text-center text-lg font-bold tracking-widest"
-            style={{
-              backgroundColor: theme.accent,
-              borderColor: theme.border,
-              color: theme.text,
-              boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
-            }}
-          >
-            {word}
-          </li>
+          <WordItem key={word} word={word} showDefinition={showDefinition} />
         ))}
       </ul>
       {hasMore && (

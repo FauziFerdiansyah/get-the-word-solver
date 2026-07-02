@@ -18,7 +18,7 @@ const emptyClues = (length) => Array.from({ length }, () => '');
 const emptyColors = (length) => Array.from({ length }, () => 'green');
 
 export default function App() {
-  const { theme, soundEnabled } = useTheme();
+  const { theme, soundEnabled, showDefinition } = useTheme();
   const [wordLength, setWordLength] = useState(5);
   const [clues, setClues] = useState(emptyClues(5));
   const [colorStates, setColorStates] = useState(emptyColors(5));
@@ -113,6 +113,18 @@ export default function App() {
     setVisibleCount(PAGE_SIZE);
     setHasSearched(false);
   };
+
+  const handleRandomWord = () => {
+    const words = WORD_LISTS[wordLength] || [];
+    if (words.length === 0) return;
+    const random = words[Math.floor(Math.random() * words.length)];
+    // Fill clue grid with the random word
+    setClues(random.split(''));
+    setColorStates(Array.from({ length: wordLength }, () => 'green'));
+  };
+
+  // Is the state "fresh" (nothing filled)?
+  const isFresh = clues.every((c) => c === '') && disabledLetters.size === 0 && !hasSearched;
 
   const handleShowMore = () => {
     setVisibleCount((prev) => prev + PAGE_SIZE);
@@ -215,6 +227,19 @@ export default function App() {
               Reset
             </button>
           </div>
+
+          {/* Random word button — only visible when fresh */}
+          {isFresh && (
+            <button
+              type="button"
+              onClick={handleRandomWord}
+              className="flex items-center justify-center gap-2 w-full rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
+              style={{ backgroundColor: theme.keyboard, borderColor: theme.border, color: theme.text, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
+            >
+              <Icon icon="tabler:dice-3" width={18} />
+              Acak Kata
+            </button>
+          )}
         </div>
 
         {/* Right panel: results */}
@@ -224,6 +249,7 @@ export default function App() {
             visibleCount={visibleCount}
             onShowMore={handleShowMore}
             hasSearched={hasSearched}
+            showDefinition={showDefinition}
           />
         </div>
       </div>

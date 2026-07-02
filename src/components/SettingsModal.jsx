@@ -6,7 +6,7 @@ import { gooeyToast } from 'goey-toast';
 const themeKeys = Object.keys(THEMES);
 
 export default function SettingsModal({ open, onClose }) {
-  const { theme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled } = useTheme();
+  const { theme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled, showDefinition, setShowDefinition } = useTheme();
 
   if (!open) return null;
 
@@ -25,6 +25,12 @@ export default function SettingsModal({ open, onClose }) {
     const next = !soundEnabled;
     setSoundEnabled(next);
     gooeyToast(next ? 'Sound effect aktif 🔊' : 'Sound effect mati 🔇', { duration: 1500 });
+  };
+
+  const handleDefToggle = () => {
+    const next = !showDefinition;
+    setShowDefinition(next);
+    gooeyToast(next ? 'Arti kata ditampilkan 📖' : 'Arti kata disembunyikan', { duration: 1500 });
   };
 
   return (
@@ -89,6 +95,31 @@ export default function SettingsModal({ open, onClose }) {
                 backgroundColor: theme.card,
                 border: `2px solid ${theme.border}`,
                 left: soundEnabled ? '22px' : '2px',
+              }}
+            />
+          </button>
+        </div>
+
+        {/* Definition Toggle */}
+        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
+            <Icon icon="tabler:book" width={18} />
+            Tampilkan Arti Kata
+          </span>
+          <button
+            onClick={handleDefToggle}
+            className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
+            style={{
+              borderColor: theme.border,
+              backgroundColor: showDefinition ? theme.green : theme.keyboard,
+            }}
+          >
+            <span
+              className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+              style={{
+                backgroundColor: theme.card,
+                border: `2px solid ${theme.border}`,
+                left: showDefinition ? '22px' : '2px',
               }}
             />
           </button>

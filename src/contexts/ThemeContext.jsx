@@ -7,6 +7,7 @@ export function ThemeProvider({ children }) {
   const [themeName, setThemeName] = useState(() => localStorage.getItem('ws-theme') || 'mint');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ws-dark') === 'true');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('ws-sound') !== 'false');
+  const [showDefinition, setShowDefinition] = useState(() => localStorage.getItem('ws-def') === 'true');
 
   useEffect(() => {
     localStorage.setItem('ws-theme', themeName);
@@ -19,6 +20,10 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('ws-sound', soundEnabled);
   }, [soundEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('ws-def', showDefinition);
+  }, [showDefinition]);
 
   const theme = THEMES[themeName] || THEMES.mint;
 
@@ -44,7 +49,7 @@ export function ThemeProvider({ children }) {
     : theme;
 
   return (
-    <ThemeContext.Provider value={{ theme: resolvedTheme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled }}>
+    <ThemeContext.Provider value={{ theme: resolvedTheme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled, showDefinition, setShowDefinition }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -10,23 +10,38 @@ const STEPS = [
   },
   {
     title: 'Isi Clue Huruf',
-    desc: 'Ketik huruf yang sudah kamu tahu posisinya dari game. Kotak akan berwarna hijau (posisi benar) atau kuning (huruf ada tapi salah posisi). Tap bulatan kecil di pojok kotak untuk ubah warna.',
+    desc: 'Ketik huruf yang sudah kamu tahu. Tap bulatan kecil di pojok kotak untuk ubah warna: hijau = posisi benar, kuning = huruf ada tapi salah posisi.',
     icon: 'tabler:forms',
   },
   {
     title: 'Coret Huruf',
-    desc: 'Tap huruf di keyboard virtual untuk menandai huruf yang TIDAK ADA di kata target (warna abu-abu di game). Huruf yang dicoret tidak akan muncul di hasil pencarian.',
+    desc: 'Tap huruf di keyboard virtual untuk menandai huruf yang TIDAK ADA di kata target (abu-abu di game). Huruf yang dicoret tidak akan muncul di hasil.',
     icon: 'tabler:keyboard',
   },
   {
-    title: 'Cari Jawaban',
-    desc: 'Tekan tombol "Cari Jawaban" untuk melihat daftar kata yang cocok. Hasil akan ditampilkan secara acak, 5 kata per halaman.',
+    title: 'Cari & Acak Kata',
+    desc: 'Tekan "Cari Jawaban" untuk melihat daftar kata cocok. Saat kondisi kosong, gunakan "Acak Kata" untuk mengisi clue dengan kata random.',
     icon: 'tabler:search',
   },
   {
-    title: 'Tips',
-    desc: 'Semakin banyak clue yang kamu isi dan huruf yang kamu coret, semakin sedikit dan akurat hasil pencariannya. Gunakan info dari game untuk mempersempit kemungkinan.',
-    icon: 'tabler:bulb',
+    title: 'Salin Jawaban',
+    desc: 'Tap icon copy di samping kata untuk salin satu kata. Atau gunakan "Salin Semua" untuk copy hingga 20 kata sekaligus (format daftar).',
+    icon: 'tabler:clipboard-list',
+  },
+  {
+    title: 'Arti Kata',
+    desc: 'Aktifkan "Tampilkan Arti Kata" di Pengaturan untuk melihat pengucapan dan definisi di bawah setiap kata hasil pencarian.',
+    icon: 'tabler:book',
+  },
+  {
+    title: 'Install di HP',
+    desc: 'Di browser HP, tap menu (⋮) lalu pilih "Add to Home Screen" / "Tambah ke Layar Utama". App ini bisa diakses seperti aplikasi native!',
+    icon: 'tabler:device-mobile-plus',
+  },
+  {
+    title: 'Pengaturan',
+    desc: 'Tap ikon ⚙️ di pojok kanan atas untuk ubah tema (6 pilihan + mode buta warna), dark/light mode, sound effect, dan toggle arti kata.',
+    icon: 'tabler:settings',
   },
 ];
 
@@ -79,6 +94,9 @@ export default function CoachMark({ open, onClose }) {
               />
             ))}
           </div>
+          <span className="text-[10px] font-bold" style={{ color: theme.textMuted }}>
+            {step + 1}/{STEPS.length}
+          </span>
           <button onClick={handleClose} className="p-1 active:scale-90 transition-transform">
             <Icon icon="tabler:x" width={18} style={{ color: theme.textMuted }} />
           </button>
@@ -114,7 +132,7 @@ export default function CoachMark({ open, onClose }) {
           <button
             onClick={handleNext}
             className="flex-1 py-2 rounded-xl border-2 text-sm font-bold transition-all active:scale-95"
-            style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: theme.text }}
+            style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: '#1e293b' }}
           >
             {isLast ? 'Selesai' : 'Lanjut'}
           </button>
