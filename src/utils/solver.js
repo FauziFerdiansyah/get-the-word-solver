@@ -28,55 +28,60 @@ export function findMatches(words, clues, colorStates, disabledLetters) {
       }
     }
 
-    // 2. Green clues: letters that must be at exact positions
-    const greenPositions = new Map(); // letter -> array of positions
+    // 2. Build constraints
+    const greenLetters = new Map(); // letter -> positions where it must be
+    const yellowLetters = new Map(); // letter -> positions where it must NOT be
+    
     for (let i = 0; i < clues.length; i += 1) {
       const clue = clues[i];
       if (!clue) continue;
+      
       const state = colorStates[i] || 'green';
+      
       if (state === 'green') {
+        // Must be at this exact position
         if (word[i] !== clue) {
           return false;
         }
-        if (!greenPositions.has(clue)) {
-          greenPositions.set(clue, []);
+        if (!greenLetters.has(clue)) {
+          greenLetters.set(clue, []);
         }
-        greenPositions.get(clue).push(i);
+        greenLetters.get(clue).push(i);
+      } else if (state === 'yellow') {
+        // Must exist in word but NOT at this position
+        if (!yellowLetters.has(clue)) {
+          yellowLetters.set(clue, new Set());
+        }
+        yellowLetters.get(clue).add(i);
       }
     }
 
-    // 3. Yellow clues: letters that must exist but NOT at marked positions
-    const yellowConstraints = new Map(); // letter -> forbidden positions
-    for (let i = 0; i < clues.length; i += 1) {
-      const clue = clues[i];
-      if (!clue) continue;
-      const state = colorStates[i] || 'green';
-      if (state === 'yellow') {
-        if (word[i] === clue) {
-          return false; // Can't be at this exact spot
-        }
-        if (!yellowConstraints.has(clue)) {
-          yellowConstraints.set(clue, []);
-        }
-        yellowConstraints.get(clue).push(i);
-      }
-    }
-
-    // 4. Verify all yellow letters exist in the word
-    for (const [letter, forbiddenPositions] of yellowConstraints) {
-      // Count occurrences of this letter in the word
-      const wordOccurrences = word.split('').filter(c => c === letter).length;
+    // 3. Verify yellow letter constraints
+    for (const [letter, forbiddenPositions] of yellowLetters) {
+      // Count how many times this letter appears in the word
+      const wordCount = word.split('').filter(c => c === letter).length;
       
-      // Count green occurrences of this letter
-      const greenOccurrences = greenPositions.get(letter)?.length || 0;
+      // Count how many times it appears in green positions
+      const greenCount = greenLetters.get(letter)?.length || 0;
       
-      // Must have at least (greenOccurrences + 1) instances to satisfy yellow
-      if (wordOccurrences < greenOccurrences + 1) {
+      // Must have at least (greenCount + 1) occurrences
+      if (wordCount < greenCount + 1) {
         return false;
       }
       
-      // Check that the yellow occurrences are not at forbidden positions
-      // (this is already checked above with word[i] === clue check)
+      // Check that it doesn't appear ONLY at forbidden positions
+      // Find if there's at least one occurrence outside forbidden positions
+      let foundValidPosition = false;
+      for (let i = 0; i < word.length; i += 1) {
+        if (word[i] === letter && !forbiddenPositions.has(i)) {
+          foundValidPosition = true;
+          break;
+        }
+      }
+      
+      if (!foundValidPosition) {
+        return false;
+      }
     }
 
     return true;
