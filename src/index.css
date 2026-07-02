@@ -1,10 +1,32 @@
 @import "tailwindcss";
 
+/* Force override browser color scheme */
+html {
+  color-scheme: light dark;
+  forced-color-adjust: none;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #faf8f5;
+  color: #1e293b;
+}
+
+/* Light mode forced */
+html.light-mode,
+html.light-mode body {
+  background-color: #faf8f5 !important;
+  color: #1e293b !important;
+}
+
+/* Dark mode forced */
+html.dark-mode,
+html.dark-mode body {
+  background-color: #121218 !important;
+  color: #f1f5f9 !important;
 }
 
 * {

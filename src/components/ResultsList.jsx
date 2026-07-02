@@ -6,40 +6,59 @@ import { getDefinition } from '../utils/dictionary';
 
 const PAGE_SIZE = 5;
 
-function WordItem({ word, showDefinition }) {
-  const { theme } = useTheme();
+function WordItem({ word, showDefinition, lang, category }) {
+  const { theme, t } = useTheme();
   const [def, setDef] = useState(null);
 
   useEffect(() => {
     if (!showDefinition) return;
     let cancelled = false;
     const fetchDef = async () => {
-      const result = await getDefinition(word);
+      const result = await getDefinition(word, lang);
       if (!cancelled) {
         setDef(result);
       }
     };
     fetchDef();
     return () => { cancelled = true; };
-  }, [word, showDefinition]);
+  }, [word, showDefinition, lang]);
 
   const displayDef = showDefinition ? def : null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(word).then(() => {
-      gooeyToast(`"${word}" disalin`, { duration: 1000 });
+      gooeyToast(`"${word}" ${t.copied}`, { duration: 1000 });
     });
+  };
+
+  // Determine indicator color based on category
+  const getIndicatorStyle = () => {
+    if (category === 'common') {
+      return { backgroundColor: theme.btnPrimary, opacity: 0.3 };
+    } else if (category === 'rare') {
+      return { backgroundColor: theme.btnSecondary, opacity: 0.3 };
+    }
+    return { backgroundColor: 'transparent' };
   };
 
   return (
     <li
-      className="rounded-xl border-2 px-4 py-3 flex flex-col gap-1"
+      className="rounded-xl border-2 px-4 py-3 flex flex-col gap-1 relative"
       style={{
         backgroundColor: theme.accent,
         borderColor: theme.border,
         boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
       }}
     >
+      {/* Category indicator (subtle dot on top-right) */}
+      {category !== 'all' && (
+        <div
+          className="absolute top-2 right-2 w-2 h-2 rounded-full"
+          style={getIndicatorStyle()}
+          title={category === 'common' ? 'Umum' : 'Jarang'}
+        />
+      )}
+      
       <div className="flex items-center justify-between">
         <span className="text-lg font-bold tracking-widest" style={{ color: theme.text }}>
           {word}
@@ -79,16 +98,26 @@ function WordItem({ word, showDefinition }) {
   );
 }
 
-export default function ResultsList({ results, visibleCount, onShowMore, hasSearched, showDefinition }) {
-  const { theme, t } = useTheme();
-  const visibleResults = results.slice(0, visibleCount);
-  const hasMore = visibleCount < results.length;
+export default function ResultsList({ results, visibleCount, onShowMore, hasSearched, showDefinition, category, onCategoryChange }) {
+  const { theme, t, lang } = useTheme();
+  
+  // Get current category results
+  let currentResults = [];
+  if (category === 'all') {
+    currentResults = [...(results.common || []), ...(results.rare || [])];
+  } else {
+    currentResults = results[category] || [];
+  }
+  
+  const totalResults = (results.common?.length || 0) + (results.rare?.length || 0);
+  const visibleResults = currentResults.slice(0, visibleCount);
+  const hasMore = visibleCount < currentResults.length;
 
   if (!hasSearched) {
     return null;
   }
 
-  if (results.length === 0) {
+  if (totalResults === 0) {
     return (
       <div
         className="rounded-xl border-2 p-4 text-center text-sm font-semibold"
@@ -101,13 +130,13 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
 
   const handleCopyAll = () => {
     const max = 20;
-    const wordsToCopy = results.slice(0, max);
+    const wordsToCopy = currentResults.slice(0, max);
     const text = wordsToCopy.map(w => `- ${w}`).join('\n');
     navigator.clipboard.writeText(text).then(() => {
-      if (results.length > max) {
-        gooeyToast(`Disalin ${max} kata (maksimal). Total ada ${results.length} kata.`, { duration: 2000 });
+      if (currentResults.length > max) {
+        gooeyToast(`${t.copiedMax} ${currentResults.length} ${t.words}.`, { duration: 2000 });
       } else {
-        gooeyToast(`Disalin ${wordsToCopy.length} kata`, { duration: 1500 });
+        gooeyToast(`${t.copiedAll}`, { duration: 1500 });
       }
     });
   };
@@ -116,7 +145,7 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-sm" style={{ color: theme.textMuted }}>
-          {t.found} <span className="font-extrabold text-base" style={{ color: theme.text }}>{results.length}</span> {t.matchWords}
+          {t.found} <span className="font-extrabold text-base" style={{ color: theme.text }}>{totalResults}</span> {t.matchWords}
         </p>
         <button
           onClick={handleCopyAll}
@@ -127,10 +156,49 @@ export default function ResultsList({ results, visibleCount, onShowMore, hasSear
           {t.copyAll}
         </button>
       </div>
+      
+      {/* Category Tabs */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => onCategoryChange('common')}
+          className="flex-1 rounded-lg border-2 py-2 text-sm font-bold transition-all active:scale-95"
+          style={{
+            backgroundColor: category === 'common' ? theme.btnPrimary : theme.card,
+            borderColor: theme.border,
+            color: category === 'common' ? '#1e293b' : theme.text,
+            boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
+          }}
+        >
+          {lang === 'id' ? 'Umum' : 'Common'} ({results.common?.length || 0})
+        </button>
+        <button
+          onClick={() => onCategoryChange('rare')}
+          className="flex-1 rounded-lg border-2 py-2 text-sm font-bold transition-all active:scale-95"
+          style={{
+            backgroundColor: category === 'rare' ? theme.btnSecondary : theme.card,
+            borderColor: theme.border,
+            color: category === 'rare' ? '#1e293b' : theme.text,
+            boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
+          }}
+        >
+          {lang === 'id' ? 'Jarang' : 'Rare'} ({results.rare?.length || 0})
+        </button>
+      </div>
+      
       <ul className="flex flex-col gap-2">
-        {visibleResults.map((word) => (
-          <WordItem key={word} word={word} showDefinition={showDefinition} />
-        ))}
+        {visibleResults.map((word) => {
+          // Determine if word is common or rare
+          const wordCategory = (results.common || []).includes(word) ? 'common' : 'rare';
+          return (
+            <WordItem 
+              key={word} 
+              word={word} 
+              showDefinition={showDefinition} 
+              lang={lang}
+              category={wordCategory}
+            />
+          );
+        })}
       </ul>
       {hasMore && (
         <button

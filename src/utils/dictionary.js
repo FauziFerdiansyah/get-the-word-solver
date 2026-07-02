@@ -1,14 +1,16 @@
 // Free Dictionary API - fetches word definitions and phonetics.
 // https://dictionaryapi.dev/
 
+import { translateText, translatePartOfSpeech } from './translator';
+
 const cache = new Map();
 
-export async function getDefinition(word) {
-  const key = word.toLowerCase();
+export async function getDefinition(word, lang = 'en') {
+  const key = `${word.toLowerCase()}|${lang}`;
   if (cache.has(key)) return cache.get(key);
 
   try {
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${key}`);
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
     if (!res.ok) {
       cache.set(key, null);
       return null;
@@ -21,9 +23,18 @@ export async function getDefinition(word) {
 
     const entry = data[0];
     const phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
-    const meaning = entry.meanings?.[0];
-    const definition = meaning?.definitions?.[0]?.definition || '';
-    const partOfSpeech = meaning?.partOfSpeech || '';
+    let definition = entry.meanings?.[0]?.definitions?.[0]?.definition || '';
+    let partOfSpeech = entry.meanings?.[0]?.partOfSpeech || '';
+
+    // Translate if language is not English
+    if (lang === 'id') {
+      if (definition) {
+        definition = await translateText(definition, 'id', 'en');
+      }
+      if (partOfSpeech) {
+        partOfSpeech = translatePartOfSpeech(partOfSpeech, 'id');
+      }
+    }
 
     const result = { phonetic, definition, partOfSpeech };
     cache.set(key, result);

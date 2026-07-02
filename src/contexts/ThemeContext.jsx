@@ -17,6 +17,13 @@ export function ThemeProvider({ children }) {
   useEffect(() => { localStorage.setItem('ws-def', showDefinition); }, [showDefinition]);
   useEffect(() => { localStorage.setItem('ws-lang', lang); }, [lang]);
 
+  // Update HTML class for CSS override
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.remove('light-mode', 'dark-mode');
+    html.classList.add(darkMode ? 'dark-mode' : 'light-mode');
+  }, [darkMode]);
+
   const theme = THEMES[themeName] || THEMES.mint;
 
   const resolvedTheme = darkMode && themeName !== 'colorblind'

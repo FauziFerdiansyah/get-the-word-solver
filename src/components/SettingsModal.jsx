@@ -39,6 +39,13 @@ export default function SettingsModal({ open, onClose }) {
     gooeyToast(next === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English', { duration: 1500 });
   };
 
+  const handleLangSelect = (newLang) => {
+    if (lang !== newLang) {
+      setLang(newLang);
+      gooeyToast(newLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English', { duration: 1500 });
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={onClose}>
       <div
@@ -65,13 +72,32 @@ export default function SettingsModal({ open, onClose }) {
             <Icon icon="tabler:language" width={18} />
             {t.language}
           </span>
-          <button
-            onClick={handleLangToggle}
-            className="px-3 py-1.5 rounded-lg border-2 text-xs font-bold active:scale-95 transition-transform"
-            style={{ borderColor: theme.border, color: theme.text, backgroundColor: theme.keyboard }}
-          >
-            {lang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleLangSelect('id')}
+              className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all active:scale-95 text-lg"
+              style={{
+                borderColor: lang === 'id' ? theme.border : theme.border + '40',
+                backgroundColor: lang === 'id' ? theme.btnPrimary : theme.keyboard,
+                opacity: lang === 'id' ? 1 : 0.6,
+              }}
+              title="Bahasa Indonesia"
+            >
+              🇮🇩
+            </button>
+            <button
+              onClick={() => handleLangSelect('en')}
+              className="w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all active:scale-95 text-lg"
+              style={{
+                borderColor: lang === 'en' ? theme.border : theme.border + '40',
+                backgroundColor: lang === 'en' ? theme.btnSecondary : theme.keyboard,
+                opacity: lang === 'en' ? 1 : 0.6,
+              }}
+              title="English"
+            >
+              🇬🇧
+            </button>
+          </div>
         </div>
 
         {/* Dark Mode Toggle */}

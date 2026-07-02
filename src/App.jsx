@@ -12,25 +12,26 @@ import ConfirmModal from './components/ConfirmModal';
 import SettingsModal from './components/SettingsModal';
 import CoachMark from './components/CoachMark';
 import RandomWordModal from './components/RandomWordModal';
-import { WORD_LISTS } from './data/words';
+import { getUniqueWords } from './data/words';
 import { findMatches } from './utils/solver';
 
 const emptyClues = (length) => Array.from({ length }, () => '');
 const emptyColors = (length) => Array.from({ length }, () => 'green');
 
 export default function App() {
-  const { theme, soundEnabled, showDefinition, t } = useTheme();
+  const { theme, soundEnabled, showDefinition, t, lang } = useTheme();
   const [wordLength, setWordLength] = useState(5);
   const [clues, setClues] = useState(emptyClues(5));
   const [colorStates, setColorStates] = useState(emptyColors(5));
   const [disabledLetters, setDisabledLetters] = useState(new Set());
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({ common: [], rare: [] });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [hasSearched, setHasSearched] = useState(false);
   const [pendingLength, setPendingLength] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
   const [showRandom, setShowRandom] = useState(false);
+  const [category, setCategory] = useState('all'); // 'common', 'rare', or 'all'
 
   const hasFilledFields = () =>
     clues.some((c) => c !== '') || disabledLetters.size > 0;
@@ -99,9 +100,18 @@ export default function App() {
   };
 
   const handleSearch = () => {
-    const words = WORD_LISTS[wordLength] || [];
+    // Get words based on category
+    const words = getUniqueWords(wordLength, 'all');
     const matches = findMatches(words, clues, colorStates, disabledLetters);
-    setResults(matches);
+    
+    // Split into common and rare
+    const allWords = getUniqueWords(wordLength, 'all');
+    const commonWords = new Set(getUniqueWords(wordLength, 'common'));
+    
+    const commonMatches = matches.filter(w => commonWords.has(w));
+    const rareMatches = matches.filter(w => !commonWords.has(w));
+    
+    setResults({ common: commonMatches, rare: rareMatches });
     setVisibleCount(PAGE_SIZE);
     setHasSearched(true);
     if (soundEnabled && matches.length > 0) playSuccessSound();
@@ -111,9 +121,10 @@ export default function App() {
     setClues(emptyClues(wordLength));
     setColorStates(emptyColors(wordLength));
     setDisabledLetters(new Set());
-    setResults([]);
+    setResults({ common: [], rare: [] });
     setVisibleCount(PAGE_SIZE);
     setHasSearched(false);
+    setCategory('all');
   };
 
   const isFresh = clues.every((c) => c === '') && disabledLetters.size === 0 && !hasSearched;
@@ -240,6 +251,8 @@ export default function App() {
             onShowMore={handleShowMore}
             hasSearched={hasSearched}
             showDefinition={showDefinition}
+            category={category}
+            onCategoryChange={setCategory}
           />
         </div>
       </div>
@@ -257,7 +270,7 @@ export default function App() {
         open={showRandom}
         onClose={() => setShowRandom(false)}
         wordLength={wordLength}
-        words={WORD_LISTS[wordLength] || []}
+        words={getUniqueWords(wordLength, 'common')}
       />
     </div>
   );
