@@ -31,12 +31,12 @@ function WordItem({ word, showDefinition, lang, category }) {
     });
   };
 
-  // Determine indicator color based on category
+  // Determine indicator color based on category - match tab background colors
   const getIndicatorStyle = () => {
     if (category === 'common') {
-      return { backgroundColor: theme.btnPrimary, opacity: 0.3 };
+      return { backgroundColor: theme.btnPrimary };
     } else if (category === 'rare') {
-      return { backgroundColor: theme.btnSecondary, opacity: 0.3 };
+      return { backgroundColor: theme.btnSecondary };
     }
     return { backgroundColor: 'transparent' };
   };
@@ -50,10 +50,10 @@ function WordItem({ word, showDefinition, lang, category }) {
         boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
       }}
     >
-      {/* Category indicator (subtle dot on top-right) */}
+      {/* Category indicator (bulat di top-left dengan warna sesuai tab) */}
       {category !== 'all' && (
         <div
-          className="absolute top-2 right-2 w-2 h-2 rounded-full"
+          className="absolute top-2 left-2 w-3 h-3 rounded-full"
           style={getIndicatorStyle()}
           title={category === 'common' ? 'Umum' : 'Jarang'}
         />
