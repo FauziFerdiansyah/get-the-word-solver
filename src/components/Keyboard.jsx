@@ -30,15 +30,15 @@ export default function Keyboard({ disabledLetters, letterColors, onToggle }) {
   };
 
   return (
-    <div className="flex flex-col gap-1 select-none">
+    <div className="flex flex-col gap-1 md:gap-2 select-none">
       {ROWS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-1">
+        <div key={rowIndex} className="flex justify-center gap-1 md:gap-2">
           {row.map((letter) => (
             <button
               key={letter}
               type="button"
               onClick={() => handleToggle(letter)}
-              className="flex-1 max-w-9 aspect-square rounded-lg border-2 text-xs sm:text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
+              className="flex-1 max-w-9 md:max-w-14 aspect-square rounded-lg md:rounded-xl border-2 text-xs sm:text-sm md:text-lg font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
               style={{
                 ...getKeyStyle(letter),
                 borderColor: theme.border,
