@@ -81,16 +81,28 @@ export default function SettingsModal({ open, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sticky so the close button stays reachable in the full screen sheet */}
+        {/* Sticky header bar: the bottom border is what separates it from the
+            content scrolling underneath in the full screen sheet. */}
         <div
-          className="flex items-center justify-between mb-4 sticky -top-4 sm:-top-5 z-10 py-3 -my-1"
-          style={{ backgroundColor: theme.card }}
+          className="flex items-center justify-between gap-3 sticky -top-4 sm:-top-5 z-10 mb-4 -mx-4 sm:-mx-5 px-4 sm:px-5 py-3 border-b-2"
+          style={{ backgroundColor: theme.card, borderColor: theme.border }}
         >
-          <h2 className="text-lg font-extrabold" style={{ color: theme.text }}>
+          <h2 className="flex items-center gap-2 text-lg font-extrabold" style={{ color: theme.text }}>
+            <span
+              className="w-8 h-8 rounded-lg border-2 flex items-center justify-center shrink-0"
+              style={{ backgroundColor: theme.accent, borderColor: theme.border }}
+            >
+              <Icon icon="tabler:settings" width={18} style={{ color: theme.text }} />
+            </span>
             {t.settings}
           </h2>
-          <button onClick={onClose} aria-label={t.close} className="p-2 -mr-1 rounded-lg active:scale-90 transition-transform touch-manipulation">
-            <Icon icon="tabler:x" width={22} style={{ color: theme.text }} />
+          <button
+            onClick={onClose}
+            aria-label={t.close}
+            className="w-9 h-9 rounded-lg border-2 flex items-center justify-center shrink-0 active:scale-90 transition-transform touch-manipulation"
+            style={{ backgroundColor: theme.card, borderColor: theme.border, boxShadow: `2px 2px 0px 0px ${theme.shadow}` }}
+          >
+            <Icon icon="tabler:x" width={18} style={{ color: theme.text }} />
           </button>
         </div>
 
@@ -276,8 +288,39 @@ export default function SettingsModal({ open, onClose }) {
           </p>
         )}
 
-        {/* Version Display */}
-        <div className="mt-6 pt-3 border-t text-center" style={{ borderColor: theme.border + '40' }}>
+        {/* Version + developer credit */}
+        <div className="mt-6 pt-4 border-t-2 flex flex-col items-center gap-3" style={{ borderColor: theme.border + '40' }}>
+          <a
+            href="https://fauzi.is-a.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-3 rounded-xl border-2 px-3 py-2.5 transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] touch-manipulation"
+            style={{
+              backgroundColor: theme.accent,
+              borderColor: theme.border,
+              boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
+            }}
+          >
+            <span
+              className="w-9 h-9 rounded-lg border-2 flex items-center justify-center shrink-0"
+              style={{ backgroundColor: theme.card, borderColor: theme.border }}
+            >
+              <Icon icon="tabler:code" width={18} style={{ color: theme.text }} />
+            </span>
+            <span className="flex flex-col min-w-0 text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: theme.textMuted }}>
+                {t.developer}
+              </span>
+              <span className="text-sm font-extrabold truncate" style={{ color: theme.text }}>
+                Fauzi Ferdiansyah
+              </span>
+              <span className="text-[11px] truncate" style={{ color: theme.textMuted }}>
+                fauzi.is-a.dev
+              </span>
+            </span>
+            <Icon icon="tabler:external-link" width={16} className="ml-auto shrink-0" style={{ color: theme.textMuted }} />
+          </a>
+
           <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.textMuted }}>
             Wordle Solver v{__APP_VERSION__}
           </p>

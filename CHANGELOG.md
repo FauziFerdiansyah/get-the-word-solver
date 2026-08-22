@@ -4,6 +4,17 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.1.0 — 2026-08-23
+
+### Added
+
+- Developer credit in Settings, linking to https://fauzi.is-a.dev/.
+
+### Changed
+
+- The Settings title is now a proper sticky header bar: bottom border, icon, and
+  a bordered close button matching the rest of the app.
+
 ## 2.0.0 — 2026-08-23
 
 ### Changed (breaking)

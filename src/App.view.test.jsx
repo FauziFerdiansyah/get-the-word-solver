@@ -96,4 +96,31 @@ describe('mobile view switcher', () => {
     expect(sheet.className).toContain('sm:max-w-sm');
     expect(sheet.className).toContain('sm:rounded-xl');
   });
+
+  it('gives the settings title a bordered header bar that stays put', async () => {
+    const user = setup();
+    await user.click(screen.getByLabelText('Settings'));
+
+    const bar = screen.getByRole('heading', { level: 2, name: /Pengaturan/ }).parentElement;
+    // The border is what separates the title from content scrolling under it.
+    expect(bar.className).toContain('border-b-2');
+    expect(bar.className).toContain('sticky');
+    // Themed, not a hardcoded colour — dark mode has broken that way before.
+    expect(bar.style.borderColor).toBeTruthy();
+    expect(bar.style.backgroundColor).toBeTruthy();
+    // Close button lives in the same bar, so it is reachable at any scroll depth.
+    expect(bar.contains(screen.getByLabelText('Tutup'))).toBe(true);
+  });
+
+  it('credits the developer with a link to their site', async () => {
+    const user = setup();
+    await user.click(screen.getByLabelText('Settings'));
+
+    const link = screen.getByRole('link', { name: /Fauzi Ferdiansyah/ });
+    expect(link.getAttribute('href')).toBe('https://fauzi.is-a.dev/');
+    expect(link.getAttribute('target')).toBe('_blank');
+    // rel is required with target=_blank so the new tab cannot reach window.opener.
+    expect(link.getAttribute('rel')).toContain('noopener');
+    expect(link.textContent).toContain('Dibuat oleh');
+  });
 });

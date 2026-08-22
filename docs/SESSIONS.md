@@ -5,6 +5,20 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.1.0
+
+Settings polish requested after the v2.0.0 release.
+
+- The title row became a real header bar — sticky with a bottom border, a gear
+  icon in a bordered box, and a close button styled like the app's other icon
+  buttons. Without the border the sticky title had nothing separating it from the
+  content scrolling underneath in the full screen sheet.
+- Added a developer credit card linking to the author's site. Verified the URL
+  first: `http://fauzi.is-a.dev/` 301s to HTTPS, so the link uses `https://`
+  directly rather than paying for a redirect from an HTTPS page.
+
+---
+
 ## 2026-08-23 — v2.0.0
 
 Long session driven by live feedback while the user played the game alongside the
