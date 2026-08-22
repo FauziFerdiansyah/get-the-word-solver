@@ -5,6 +5,24 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.2.0
+
+Walkthrough (CoachMark) rewritten after the user called it ugly and out of date.
+
+- Copy: 11 steps → 8, each one short and matching current behaviour. The old copy
+  still told users to press "Cari Jawaban" (removed in 2.0.0) and explained the
+  `AA` duplicate encoding (also removed).
+- Layout: reused the settings sheet's shape — header bar with border, step
+  counter, bordered close button, full screen on phones. Added a tappable
+  progress bar, labelled Back/Next buttons that stay in place (hiding Back on
+  step 1 used to shift Next sideways), and arrow-key / Escape handling.
+- Real defect found: icons lived in an `ICONS` array inside the component with 8
+  entries while i18n had 11 steps, so steps 9–11 rendered a generic fallback.
+  Icons moved into the step data, with a test asserting every step in both
+  languages has one.
+
+---
+
 ## 2026-08-23 — v2.1.0
 
 Settings polish requested after the v2.0.0 release.

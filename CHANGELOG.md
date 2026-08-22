@@ -4,6 +4,25 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.2.0 — 2026-08-23
+
+### Changed
+
+- **Walkthrough rewritten.** 11 vague steps became 8 concrete ones that describe
+  the app as it works now: both input modes, the yellow-box rules, live ranked
+  suggestions, the phone view switcher, and the install button. Dropped references
+  to the removed search button and the old `AA` duplicate-letter encoding.
+- **Walkthrough redesigned**: header bar with a step counter and a bordered close
+  button, a large step icon, readable body text, a tappable progress bar, and
+  Back/Next buttons that keep their positions. Full screen on phones.
+- Arrow keys move between steps and Escape closes it.
+
+### Fixed
+
+- Step icons came from an array in the component that had 8 entries for 11 steps,
+  so the last three steps fell back to a generic icon. Each step now carries its
+  own icon and a test enforces it in both languages.
+
 ## 2.1.0 — 2026-08-23
 
 ### Added
