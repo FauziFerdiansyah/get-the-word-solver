@@ -9,13 +9,20 @@ export function ThemeProvider({ children }) {
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('ws-dark') === 'true');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('ws-sound') !== 'false');
   const [showDefinition, setShowDefinition] = useState(() => localStorage.getItem('ws-def') === 'true');
+  const [showKeyboardExtras, setShowKeyboardExtras] = useState(() => localStorage.getItem('ws-keys') === 'true');
+  const [multiExcluded, setMultiExcluded] = useState(() => localStorage.getItem('ws-multi') === 'true');
   const [lang, setLang] = useState(() => localStorage.getItem('ws-lang') || 'id');
 
   useEffect(() => { localStorage.setItem('ws-theme', themeName); }, [themeName]);
   useEffect(() => { localStorage.setItem('ws-dark', darkMode); }, [darkMode]);
   useEffect(() => { localStorage.setItem('ws-sound', soundEnabled); }, [soundEnabled]);
   useEffect(() => { localStorage.setItem('ws-def', showDefinition); }, [showDefinition]);
-  useEffect(() => { localStorage.setItem('ws-lang', lang); }, [lang]);
+  useEffect(() => { localStorage.setItem('ws-keys', showKeyboardExtras); }, [showKeyboardExtras]);
+  useEffect(() => { localStorage.setItem('ws-multi', multiExcluded); }, [multiExcluded]);
+  useEffect(() => {
+    localStorage.setItem('ws-lang', lang);
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   // Update HTML class for CSS override
   useEffect(() => {
@@ -52,6 +59,8 @@ export function ThemeProvider({ children }) {
       darkMode, setDarkMode,
       soundEnabled, setSoundEnabled,
       showDefinition, setShowDefinition,
+      showKeyboardExtras, setShowKeyboardExtras,
+      multiExcluded, setMultiExcluded,
       lang, setLang, t,
     }}>
       {children}

@@ -1,0 +1,132 @@
+# AGENTS.md
+
+Instructions for AI agents working on this repository. Read this before making
+changes. Human contributors should read [CONTRIBUTING.md](CONTRIBUTING.md).
+
+- **Project**: Wordle Solver / Get the Word Solver — a static, client-only web app
+  that suggests answers for 4, 5 and 6 letter word puzzles.
+- **Stack**: Vite + React 19 + Tailwind CSS 4, Vitest + Testing Library, no backend.
+- **Current version**: see `version` in [package.json](package.json) — it is the
+  single source of truth (see [Versioning](#versioning)).
+
+Companion documents:
+
+| Document | Contents |
+|---|---|
+| [docs/SRS.md](docs/SRS.md) | Software requirements specification |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Numbered functional & non-functional requirements |
+| [docs/DESIGN.md](docs/DESIGN.md) | Architecture, data flow, design decisions and their rationale |
+| [docs/SKILLS.md](docs/SKILLS.md) | Task playbooks (regenerate the word list, add a theme, tune sounds, ...) |
+| [docs/SESSIONS.md](docs/SESSIONS.md) | Log of agent work sessions |
+| [CHANGELOG.md](CHANGELOG.md) | Released versions |
+
+---
+
+## Versioning
+
+**Every change bumps the version.** The size of the change decides which part.
+
+| Bump | When | Examples |
+|---|---|---|
+| **PATCH** `x.y.Z` | Small: nothing about the product's shape changes | Bug fix, copy/translation edit, styling tweak, test added, comment or doc edit, dependency patch |
+| **MINOR** `x.Y.0` | Medium: something new that existing users keep working through | New feature, new setting, new component, new i18n key, new word-list source, ranking tweak, accessibility improvement |
+| **MAJOR** `X.0.0` | Large: existing behaviour, data shape or a public contract changes incompatibly | Input model redesign, `src/data/words.js` export shape change, solver signature change, removing a setting or mode, framework upgrade that changes authoring rules |
+
+Bump checklist:
+
+1. `package.json` → `version`
+2. `public/sw.js` → `CACHE_NAME` (must change, or returning visitors keep the old
+   bundle — this is a static file Vite does not process, so it is manual)
+3. `CHANGELOG.md` → new entry at the top, newest first
+4. `docs/SESSIONS.md` → append what was done and why
+5. Bump `docs/*` `Version:` headers only when that document's content changed
+
+The version shown in Settings comes from `package.json` through the
+`__APP_VERSION__` define in [vite.config.js](vite.config.js). Never hardcode it.
+
+---
+
+## Working rules
+
+**Verify, do not assume.** Before claiming anything about behaviour, run it:
+
+```bash
+npm install
+npm test          # vitest, 79 tests
+npm run build     # must succeed
+npx eslint src scripts   # must report 0 problems
+npm run build:words      # regenerates src/data/words.js (deterministic)
+```
+
+`npm test` and `npx eslint src scripts` are the gate. Do not hand work back with
+either failing.
+
+**The word list is generated, never hand-edited.** `src/data/words.js` carries an
+"AUTO-GENERATED" header. To change which words exist, change the rules in
+[scripts/build-words.mjs](scripts/build-words.mjs) and regenerate. Editing the
+data file directly gets silently overwritten on the next run.
+
+**Tests assert behaviour, not implementation.** jsdom loads no stylesheet, so
+Tailwind visibility cannot be observed. Where layout matters, assert the classes
+or inline styles that decide it (see `src/App.view.test.jsx`), and say so in a
+comment.
+
+**Watch out for these traps** — each one has already cost a debugging round:
+
+- The toast library renders notifications as `<li>`. Scope result queries to
+  `data-testid="results-panel"` or they pick up toasts as answers.
+- `sound.js` caches its `AudioContext` at module scope. Tests must share one log
+  object; a fresh log per test leaves the cached context reporting into the old one.
+- A browser will not start an `AudioContext` outside a user gesture and
+  `resume()` is async. Chain off its promise; never guess with `setTimeout`.
+- Chrome invalidates a manifest icon whose declared `sizes` does not match the
+  real file, and then never offers installation.
+- iOS Safari zooms the page in when a focused field's font is under 16px. This is
+  handled by `maximum-scale=1.0` in the viewport meta, not by CSS.
+
+**Do not add dependencies** without a clear reason; the app ships as static files
+and the bundle is already ~515 kB.
+
+---
+
+## Repository map
+
+```
+src/
+  App.jsx              state owner: level, mode, clues, board, results
+  components/
+    ClueGrid.jsx       single-row input: green box + ruled-out letters box
+    BoardGrid.jsx      6-row board input, one guess per row
+    ModeSelector.jsx   1 row / 6 rows
+    ViewSwitcher.jsx   phone-only clues / answers tabs
+    Keyboard.jsx       20-column grid, letter crossing-out, decorative Enter/Backspace
+    ResultsList.jsx    ranked suggestions, tier tabs, copy
+    LevelSelector.jsx  4 / 5 / 6 letters
+    SettingsModal.jsx  themes, language, sound, toggles
+    CoachMark.jsx      first-run walkthrough
+    RandomWordModal.jsx
+    InstallButton.jsx  PWA install
+    ConfirmModal.jsx
+  utils/
+    solver.js          findMatches (single row), findMatchesFromBoard (6 rows), ranking
+    sound.js           per-letter mechanical key synthesis
+    dictionary.js      Free Dictionary API + cache
+    translator.js
+  data/
+    words.js           GENERATED — ranked word lists
+    themes.js          6 colour themes
+    i18n.js            id / en strings
+scripts/
+  build-words.mjs      regenerates words.js from 7 public sources
+```
+
+## Conventions
+
+- Functional components with hooks; no class components.
+- Colours come from `useTheme()`. Never hardcode a hex value in a component —
+  dark mode has broken twice that way.
+- Every user-facing string goes through `src/data/i18n.js`, both `id` and `en`.
+- Interactive elements need `aria-label`, `touch-manipulation`, and a target of at
+  least ~40px.
+- Comments explain *why*, especially where a simpler-looking approach was tried
+  and failed.

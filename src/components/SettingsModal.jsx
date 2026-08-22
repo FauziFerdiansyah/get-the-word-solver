@@ -1,12 +1,18 @@
 import { Icon } from '@iconify/react';
 import { useTheme } from '../contexts/ThemeContext';
+import { playTestSound, getAudioState } from '../utils/sound';
 import { THEMES } from '../data/themes';
 import { gooeyToast } from 'goey-toast';
 
 const themeKeys = Object.keys(THEMES);
 
 export default function SettingsModal({ open, onClose }) {
-  const { theme, themeName, setThemeName, darkMode, setDarkMode, soundEnabled, setSoundEnabled, showDefinition, setShowDefinition, lang, setLang, t } = useTheme();
+  const {
+    theme, themeName, setThemeName, darkMode, setDarkMode,
+    soundEnabled, setSoundEnabled, showDefinition, setShowDefinition,
+    showKeyboardExtras, setShowKeyboardExtras,
+    multiExcluded, setMultiExcluded, lang, setLang, t,
+  } = useTheme();
 
   if (!open) return null;
 
@@ -33,10 +39,26 @@ export default function SettingsModal({ open, onClose }) {
     gooeyToast(next ? '📖 ON' : '📖 OFF', { duration: 1500 });
   };
 
-  const handleLangToggle = () => {
-    const next = lang === 'id' ? 'en' : 'id';
-    setLang(next);
-    gooeyToast(next === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English', { duration: 1500 });
+  // Reports what the audio engine is actually doing, so "no sound" can be told
+  // apart from "browser never started the audio context".
+  const handleTestSound = () => {
+    playTestSound();
+    setTimeout(() => {
+      const state = getAudioState();
+      gooeyToast(state === 'running' ? '🔊 ✓' : `🔇 audio: ${state}`, { duration: 2000 });
+    }, 300);
+  };
+
+  const handleMultiExcludedToggle = () => {
+    const next = !multiExcluded;
+    setMultiExcluded(next);
+    gooeyToast(next ? `✓ ${t.multiExcluded}` : `✕ ${t.multiExcluded}`, { duration: 1500 });
+  };
+
+  const handleKeyboardExtrasToggle = () => {
+    const next = !showKeyboardExtras;
+    setShowKeyboardExtras(next);
+    gooeyToast(next ? '⌨️ ON' : '⌨️ OFF', { duration: 1500 });
   };
 
   const handleLangSelect = (newLang) => {
@@ -47,9 +69,11 @@ export default function SettingsModal({ open, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex bg-black/40 sm:items-center sm:justify-center sm:px-4" onClick={onClose}>
+      {/* Full screen on a phone: a settings sheet squeezed into a small centred
+          card meant constant scrolling inside a scrolling page. */}
       <div
-        className="w-full max-w-sm rounded-xl border-2 p-5 max-h-[85vh] overflow-y-auto"
+        className="w-full h-full overflow-y-auto p-4 sm:h-auto sm:max-h-[88vh] sm:max-w-sm sm:rounded-xl sm:border-2 sm:p-5"
         style={{
           backgroundColor: theme.card,
           borderColor: theme.border,
@@ -57,11 +81,15 @@ export default function SettingsModal({ open, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
+        {/* Sticky so the close button stays reachable in the full screen sheet */}
+        <div
+          className="flex items-center justify-between mb-4 sticky -top-4 sm:-top-5 z-10 py-3 -my-1"
+          style={{ backgroundColor: theme.card }}
+        >
           <h2 className="text-lg font-extrabold" style={{ color: theme.text }}>
             {t.settings}
           </h2>
-          <button onClick={onClose} className="p-1 rounded-lg active:scale-90 transition-transform">
+          <button onClick={onClose} aria-label={t.close} className="p-2 -mr-1 rounded-lg active:scale-90 transition-transform touch-manipulation">
             <Icon icon="tabler:x" width={22} style={{ color: theme.text }} />
           </button>
         </div>
@@ -121,6 +149,16 @@ export default function SettingsModal({ open, onClose }) {
             <Icon icon={soundEnabled ? 'tabler:volume' : 'tabler:volume-off'} width={18} />
             {t.soundEffect}
           </span>
+          <div className="flex items-center gap-2">
+            {soundEnabled && (
+              <button
+                onClick={handleTestSound}
+                className="px-2.5 py-1.5 rounded-lg border-2 text-xs font-bold active:scale-95 transition-transform touch-manipulation"
+                style={{ borderColor: theme.border, backgroundColor: theme.keyboard, color: theme.text }}
+              >
+                {t.testSound}
+              </button>
+            )}
           <button
             onClick={handleSoundToggle}
             className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
@@ -131,6 +169,7 @@ export default function SettingsModal({ open, onClose }) {
               style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: soundEnabled ? '22px' : '2px' }}
             />
           </button>
+          </div>
         </div>
 
         {/* Definition Toggle */}
@@ -147,6 +186,47 @@ export default function SettingsModal({ open, onClose }) {
             <span
               className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
               style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: showDefinition ? '22px' : '2px' }}
+            />
+          </button>
+        </div>
+
+        {/* Keyboard Extras Toggle */}
+        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
+            <Icon icon="tabler:keyboard" width={18} />
+            {t.showKeyboardExtras}
+          </span>
+          <button
+            onClick={handleKeyboardExtrasToggle}
+            className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
+            style={{ borderColor: theme.border, backgroundColor: showKeyboardExtras ? theme.green : theme.keyboard }}
+          >
+            <span
+              className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: showKeyboardExtras ? '22px' : '2px' }}
+            />
+          </button>
+        </div>
+
+        {/* Multi-letter yellow boxes */}
+        <div className="flex items-start justify-between gap-3 py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex flex-col gap-0.5" style={{ color: theme.text }}>
+            <span className="flex items-center gap-2">
+              <Icon icon="tabler:layout-list" width={18} />
+              {t.multiExcluded}
+            </span>
+            <span className="text-[11px] font-normal" style={{ color: theme.textMuted }}>
+              {t.multiExcludedNote}
+            </span>
+          </span>
+          <button
+            onClick={handleMultiExcludedToggle}
+            className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95 shrink-0"
+            style={{ borderColor: theme.border, backgroundColor: multiExcluded ? theme.green : theme.keyboard }}
+          >
+            <span
+              className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: multiExcluded ? '22px' : '2px' }}
             />
           </button>
         </div>
@@ -199,7 +279,7 @@ export default function SettingsModal({ open, onClose }) {
         {/* Version Display */}
         <div className="mt-6 pt-3 border-t text-center" style={{ borderColor: theme.border + '40' }}>
           <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.textMuted }}>
-            Wordle Solver v1.0.0
+            Wordle Solver v{__APP_VERSION__}
           </p>
         </div>
       </div>

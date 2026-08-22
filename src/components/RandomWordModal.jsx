@@ -1,78 +1,63 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { gooeyToast } from 'goey-toast';
 
-export default function RandomWordModal({ open, onClose, words, wordLength }) {
-  const { theme, t } = useTheme();
-  const [displayWord, setDisplayWord] = useState('');
-  const [shuffling, setShuffling] = useState(false);
-  const intervalRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const openedRef = useRef(false);
-  const wordsRef = useRef([]);
-  const onCloseRef = useRef(onClose);
+const SHUFFLE_STEPS = 15;
+const SHUFFLE_INTERVAL = 80;
+const AUTO_CLOSE_MS = 8000;
 
-  // Keep refs updated
-  onCloseRef.current = onClose;
-  wordsRef.current = (words || []).filter(w => w.length === wordLength);
+// Mounted only while open, so every appearance starts a fresh draw.
+// `words` is expected to be the top-ranked slice for the level, which keeps the
+// draw on words that actually turn up in the game.
+export default function RandomWordModal({ onClose, words, wordLength }) {
+  const { theme, t } = useTheme();
+  const pool = useMemo(
+    () => (words || []).filter((w) => w.length === wordLength),
+    [words, wordLength]
+  );
+  const [displayWord, setDisplayWord] = useState(() => pool[0] || '');
+  const [shuffling, setShuffling] = useState(pool.length > 0);
 
   useEffect(() => {
-    if (!open) {
-      openedRef.current = false;
-      setDisplayWord('');
-      setShuffling(false);
-      return;
-    }
+    if (pool.length === 0) return undefined;
+    const pick = () => pool[Math.floor(Math.random() * pool.length)];
 
-    const validWords = wordsRef.current;
-    if (validWords.length === 0) return;
-
-    // Only start shuffling once per open
-    if (openedRef.current) return;
-    openedRef.current = true;
-
-    let count = 0;
-    const maxShuffles = 15;
-    setShuffling(true);
-
-    intervalRef.current = setInterval(() => {
-      const randomIdx = Math.floor(Math.random() * validWords.length);
-      setDisplayWord(validWords[randomIdx]);
-      count++;
-      if (count >= maxShuffles) {
-        clearInterval(intervalRef.current);
-        const finalIdx = Math.floor(Math.random() * validWords.length);
-        setDisplayWord(validWords[finalIdx]);
+    let step = 0;
+    const interval = setInterval(() => {
+      step += 1;
+      setDisplayWord(pick());
+      if (step >= SHUFFLE_STEPS) {
+        clearInterval(interval);
         setShuffling(false);
       }
-    }, 80);
+    }, SHUFFLE_INTERVAL);
 
-    // Auto-close after 8 seconds
-    timeoutRef.current = setTimeout(() => {
-      onCloseRef.current();
-    }, 8000);
+    const timeout = setTimeout(() => onClose(), AUTO_CLOSE_MS);
 
     return () => {
-      clearInterval(intervalRef.current);
-      clearTimeout(timeoutRef.current);
+      clearInterval(interval);
+      clearTimeout(timeout);
     };
-  }, [open]);
+    // onClose is stable enough here: the modal unmounts as soon as it fires.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pool]);
 
   const handleCopy = useCallback(() => {
     if (!displayWord || shuffling) return;
-    navigator.clipboard.writeText(displayWord).then(() => {
-      gooeyToast(`📋 "${displayWord}" ${t.copied}`, { duration: 1500 });
-    }).catch(() => {
-      gooeyToast('❌ Failed to copy', { duration: 1500 });
-    });
+    navigator.clipboard
+      .writeText(displayWord)
+      .then(() => {
+        gooeyToast(`📋 "${displayWord}" ${t.copied}`, { duration: 1500 });
+      })
+      .catch(() => {
+        gooeyToast('❌ Failed to copy', { duration: 1500 });
+      });
   }, [displayWord, shuffling, t.copied]);
-
-  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
       <div
-        className="w-full max-w-xs rounded-xl border-2 p-6 flex flex-col items-center gap-4"
+        className="w-full max-w-xs rounded-xl border-2 p-4 sm:p-6 flex flex-col items-center gap-4"
         style={{
           backgroundColor: theme.card,
           borderColor: theme.border,
@@ -84,11 +69,11 @@ export default function RandomWordModal({ open, onClose, words, wordLength }) {
           🎲 {t.randomTitle}
         </h3>
 
-        <div className="flex justify-center gap-1.5" style={{ minHeight: '56px' }}>
+        <div className="flex w-full justify-center gap-1.5" style={{ minHeight: '56px' }}>
           {displayWord.split('').map((letter, i) => (
             <span
               key={i}
-              className="w-10 h-12 rounded-lg border-2 flex items-center justify-center text-xl font-extrabold transition-all"
+              className="flex-1 max-w-10 aspect-[5/6] rounded-lg border-2 flex items-center justify-center text-lg sm:text-xl font-extrabold transition-all"
               style={{
                 backgroundColor: shuffling ? theme.keyboard : theme.green,
                 color: shuffling ? theme.text : theme.textOnColor,
@@ -102,7 +87,6 @@ export default function RandomWordModal({ open, onClose, words, wordLength }) {
           ))}
         </div>
 
-        {/* Copy button - visible when not shuffling */}
         {!shuffling && displayWord && (
           <button
             type="button"
@@ -115,7 +99,7 @@ export default function RandomWordModal({ open, onClose, words, wordLength }) {
               boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
             }}
           >
-            📋 Salin Kata
+            📋 {t.copyWord}
           </button>
         )}
 
@@ -123,15 +107,12 @@ export default function RandomWordModal({ open, onClose, words, wordLength }) {
         <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: theme.keyboard }}>
           <div
             className="h-full rounded-full"
-            style={{
-              backgroundColor: theme.green,
-              animation: 'shrink 8s linear forwards',
-            }}
+            style={{ backgroundColor: theme.green, animation: 'shrink 8s linear forwards' }}
           />
         </div>
 
-        <p className="text-[10px]" style={{ color: theme.textMuted }}>
-          {shuffling ? '🎲 ...' : '✨'}
+        <p className="text-[10px] text-center" style={{ color: theme.textMuted }}>
+          {shuffling ? '🎲 ...' : t.randomHint}
         </p>
       </div>
     </div>

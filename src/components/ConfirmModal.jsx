@@ -18,7 +18,7 @@ export default function ConfirmModal({ open, message, onConfirm, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-xl border-2 py-2 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
+            className="flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] touch-manipulation"
             style={{ backgroundColor: theme.card, borderColor: theme.border, color: theme.text, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
             {t.cancel}
@@ -26,7 +26,7 @@ export default function ConfirmModal({ open, message, onConfirm, onCancel }) {
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 rounded-xl border-2 py-2 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px]"
+            className="flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] touch-manipulation"
             style={{ backgroundColor: theme.red, borderColor: theme.border, color: '#ffffff', boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
             {t.yesReset}

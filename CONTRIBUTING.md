@@ -192,3 +192,19 @@ Dengan berkontribusi, kamu setuju bahwa kontribusimu akan dilisensikan di bawah 
 ---
 
 Terima kasih! 🙏
+
+---
+
+## Versioning
+
+Every change bumps `version` in `package.json`:
+
+| Bump | When |
+|---|---|
+| PATCH `x.y.Z` | Bug fix, copy or styling tweak, test, docs |
+| MINOR `x.Y.0` | New feature, setting, component, or word-list rule |
+| MAJOR `X.0.0` | Breaking change to behaviour, data shape or a public contract |
+
+Also bump `CACHE_NAME` in `public/sw.js`, add a `CHANGELOG.md` entry, and run
+`npm test` plus `npx eslint src scripts` before opening a PR. Full rules live in
+[AGENTS.md](AGENTS.md#versioning).

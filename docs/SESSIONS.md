@@ -1,0 +1,103 @@
+# Sessions
+
+Newest first. One entry per working session: what changed, why, and anything the
+next agent would otherwise rediscover the hard way.
+
+---
+
+## 2026-08-23 — v2.0.0
+
+Long session driven by live feedback while the user played the game alongside the
+app. Grouped by area.
+
+### Word list rebuilt and ranked (MAJOR)
+
+The user reported words that the game rejects (`USED`, `TEEN`) and words that are
+not words (`FRIV`). None were in the local `src/data/words.js`, so the whole list
+was regenerated rather than patched.
+
+- New `scripts/build-words.mjs` generates the list from words_alpha, WordNet,
+  OpenSubtitles, Wikipedia frequency, google-10000-english, the official Wordle
+  answers and the LDNOOBW profanity list.
+- 1,562 words removed, 4,086 added: 4L 2,042 · 5L 3,234 · 6L 3,940.
+- Every word now carries a rank; the solver returns results ordered instead of
+  shuffled, and `getTopWords` feeds the random word picker.
+
+Calibration findings worth keeping:
+
+- Function words (`THERE`, `WOULD`, `WHICH`) and `PHOTO`, `VIDEO`, `EMAIL`,
+  `LATTE`, `BADLY`, `ODDLY`, `BEING` **are** official Wordle answers. The first
+  blacklist deleted them; the answer list now bypasses every heuristic.
+- A first-names filter had to be abandoned — `DAISY`, `GRACE`, `PEARL`, `HOLLY`,
+  `BILLY`, `ROBIN` are answers. Names are penalised in ranking instead.
+- WordNet lists some comparatives (`larger`) as adjective lemmas, so the
+  comparative guard uses noun membership only.
+
+### Board mode (MINOR)
+
+Added the 6-row game board (`BoardGrid`, `findMatchesFromBoard`) with the real
+duplicate rules, plus `ModeSelector`.
+
+### Single-row input model, three iterations (MAJOR)
+
+1. Started as one letter per box with a green/yellow dot. The solver counted a
+   letter listed twice as two copies, which hid correct answers.
+2. Replaced with a per-box list of ruled-out letters, where `AA` meant "two A's".
+   The user called the encoding weird — correctly, it was undiscoverable.
+3. Landed on: dot on the placed letter for green/yellow, plus a ruled-out list
+   that dedupes. Two-of-the-same-letter is board mode's job now.
+
+The dot was removed in step 2 and had to be restored; do not remove it again.
+
+### Live suggestions and mobile layout (MINOR)
+
+- Search button removed; results are a `useMemo`.
+- `ViewSwitcher`: sticky phone-only Clues/Answers tabs under the header, with a
+  live match count. It was briefly moved above the header and moved back.
+- Fluid tiles, tighter padding, ~40 px targets, All tier tab added, dark-mode
+  fixes for the empty state and conflict box.
+
+### Keyboard (MINOR)
+
+Rebuilt as a 20-column grid after two wrong readings of the game's layout. Final:
+Backspace spans the two columns under K and L; Enter is one column wide and two
+rows tall, right of L and under P. Decorative, behind a setting.
+
+### Sound engine (MINOR, then a real bug fix)
+
+Synthesised per-letter switch sounds. Two bugs made it silent in a real browser
+while passing tests:
+
+- The test sound scheduled its notes with `setTimeout`, so they ran outside the
+  user gesture and the browser refused to start audio.
+- Key presses retried after a fixed 60 ms guess instead of chaining off
+  `resume()`.
+
+Also raised every frequency above 240 Hz; the original 110–250 Hz body was
+inaudible on phone speakers. Added a "Tes" button that reports the
+`AudioContext` state.
+
+### PWA (MINOR)
+
+Installation never worked because the manifest declared `word.png` (really 64×64)
+as 192×192 and 512×512. Generated real icons, dropped the orientation lock so
+tablets and desktops qualify, added `display_override`, a 180 px Apple touch
+icon, and an install button driven by `beforeinstallprompt`.
+
+### Testing
+
+From zero to 79 tests (Vitest + Testing Library + jsdom). Two traps found while
+writing them:
+
+- The toast library renders `<li>`, so unscoped `listitem` queries picked up
+  notifications as answers.
+- `sound.js` caches its `AudioContext`, so a fresh log per test left the cached
+  context reporting into the previous one.
+
+### Notes for whoever is next
+
+- The user repeatedly saw behaviour that contradicted passing tests. Every time,
+  a hard reload resolved it — a service worker is registered.
+- iOS zoom on focused inputs is handled by `maximum-scale=1.0` in the viewport,
+  not by CSS. An earlier `.clue-strip:focus { font-size: 16px }` rule blocked the
+  live font shrinking the user asked for.

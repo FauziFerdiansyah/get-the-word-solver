@@ -26,7 +26,7 @@ export default function CoachMark({ open, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={handleClose}>
       <div
-        className="w-full max-w-xs rounded-xl border-2 p-5"
+        className="w-full max-w-sm rounded-xl border-2 p-4 sm:p-5"
         style={{ backgroundColor: theme.card, borderColor: theme.border, boxShadow: `4px 4px 0px 0px ${theme.shadow}` }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -37,7 +37,7 @@ export default function CoachMark({ open, onClose }) {
             ))}
           </div>
           <span className="text-[10px] font-bold" style={{ color: theme.textMuted }}>{step + 1}/{steps.length}</span>
-          <button onClick={handleClose} className="p-1 active:scale-90 transition-transform">
+          <button onClick={handleClose} className="p-2 -mr-1 active:scale-90 transition-transform touch-manipulation">
             <Icon icon="tabler:x" width={18} style={{ color: theme.textMuted }} />
           </button>
         </div>
@@ -52,11 +52,11 @@ export default function CoachMark({ open, onClose }) {
 
         <div className="flex gap-2 mt-4">
           {step > 0 && (
-            <button onClick={handlePrev} className="flex-1 py-2 rounded-xl border-2 text-sm font-bold transition-all active:scale-95" style={{ borderColor: theme.border, color: theme.text }}>
+            <button onClick={handlePrev} className="flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all active:scale-95 touch-manipulation" style={{ borderColor: theme.border, color: theme.text }}>
               ←
             </button>
           )}
-          <button onClick={handleNext} className="flex-1 py-2 rounded-xl border-2 text-sm font-bold transition-all active:scale-95" style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: '#1e293b' }}>
+          <button onClick={handleNext} className="flex-1 py-3 rounded-xl border-2 text-sm font-bold transition-all active:scale-95 touch-manipulation" style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: '#1e293b' }}>
             {isLast ? '✓' : '→'}
           </button>
         </div>

@@ -5,8 +5,17 @@ import { translateText, translatePartOfSpeech } from './translator';
 
 const cache = new Map();
 
+const cacheKey = (word, lang) => `${word.toLowerCase()}|${lang}`;
+
+// Lets a component render an already-fetched definition on its very first paint.
+// Without this, remounting a word (switching result tabs) renders it with no
+// definition and then grows once the promise resolves, which reads as flicker.
+export function getCachedDefinition(word, lang = 'en') {
+  return cache.get(cacheKey(word, lang));
+}
+
 export async function getDefinition(word, lang = 'en') {
-  const key = `${word.toLowerCase()}|${lang}`;
+  const key = cacheKey(word, lang);
   if (cache.has(key)) return cache.get(key);
 
   try {
