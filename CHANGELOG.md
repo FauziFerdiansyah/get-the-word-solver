@@ -4,6 +4,27 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.4.0 — 2026-08-23
+
+### Added
+
+- **Deleting a letter now sounds too**, using the pack's own Backspace recording
+  as a 27th slot in the sprite. Applies to the clue boxes, the ruled-out letters
+  and the 6-row board.
+- **Step-by-step install guide** for platforms with no automatic prompt. Numbered
+  steps with icons, in three variants: Safari on iOS, another browser on iOS
+  (which is pointed at Safari first), and a desktop browser that never reported
+  installability.
+
+### Changed
+
+- **The installed app's top bar follows the theme** instead of staying green: the
+  `theme-color` meta tracks the page background, so it is near-black in dark mode,
+  near-white in light, and exactly `#000`/`#fff` with high contrast. The iOS status
+  bar style switches with dark mode as well (iOS applies it at next launch).
+- The manifest's `theme_color` is neutral rather than green, so the install splash
+  matches too.
+
 ## 2.3.0 — 2026-08-23
 
 ### Added

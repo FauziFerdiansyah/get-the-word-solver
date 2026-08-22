@@ -8,10 +8,11 @@
  * so this script keeps only the 26 letter samples and re-encodes them as one
  * small mono MP3.
  *
- * Layout of the output: 26 fixed-width slots, one per letter of the QWERTY rows,
- * each SLOT_MS long with the sample at the start and silence after it.
+ * Layout of the output: fixed-width slots, one per letter of the QWERTY rows plus
+ * one for Backspace, each SLOT_MS long with the sample at the start and silence
+ * after it.
  *
- *   slot(letter) = LAYOUT.indexOf(letter) * SLOT_MS
+ *   slot(key) = LAYOUT.indexOf(key) * SLOT_MS
  *
  * Fixed slots mean the player needs no per-letter table, and the generous
  * padding absorbs the uniform decoder delay MP3 adds at the start of a buffer:
@@ -32,9 +33,9 @@ const PACK = 'cherrymx-blue-abs';
 const BASE = `https://raw.githubusercontent.com/hainguyents13/mechvibes/master/src/audio/${PACK}`;
 const OUT = path.resolve(import.meta.dirname, '../public/keys.mp3');
 
-// Keys are listed in QWERTY row order, which is also the order the app's
-// keyboard renders them in.
-export const LAYOUT = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+// Keys in QWERTY row order — the order the app's keyboard renders them in —
+// followed by Backspace, which deleting a letter plays.
+export const LAYOUT = [...'QWERTYUIOPASDFGHJKLZXCVBNM', 'BACKSPACE'];
 export const SLOT_MS = 300;
 
 // Raw key codes used by the pack's config (classic set-1 scancodes).
@@ -42,6 +43,7 @@ const KEY_CODES = {
   Q: 16, W: 17, E: 18, R: 19, T: 20, Y: 21, U: 22, I: 23, O: 24, P: 25,
   A: 30, S: 31, D: 32, F: 33, G: 34, H: 35, J: 36, K: 37, L: 38,
   Z: 44, X: 45, C: 46, V: 47, B: 48, N: 49, M: 50,
+  BACKSPACE: 14,
 };
 
 const run = (cmd, args) => execFileSync(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });

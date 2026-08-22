@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { useTheme } from '../contexts/ThemeContext';
+import InstallGuideModal from './InstallGuideModal';
 
 // Android/Chrome fires `beforeinstallprompt` when the app qualifies for
 // installation; holding on to that event lets us offer a real install button
@@ -15,7 +16,7 @@ export default function InstallButton() {
   const { theme, t } = useTheme();
   const [promptEvent, setPromptEvent] = useState(null);
   const [installed, setInstalled] = useState(isStandalone);
-  const [hint, setHint] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     const onPrompt = (e) => {
@@ -35,7 +36,13 @@ export default function InstallButton() {
     };
   }, []);
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent || '');
+  const ua = navigator.userAgent || '';
+  // iPadOS 13+ reports itself as a Mac, so touch support is the giveaway.
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (/Macintosh/.test(ua) && typeof document !== 'undefined' && navigator.maxTouchPoints > 1);
+  // Every iOS browser is WebKit; only the real Safari UA lacks these markers.
+  const isIOSSafari = isIOS && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
 
   if (installed) return null;
   // Nothing to offer on a desktop browser that never signalled installability.
@@ -49,11 +56,11 @@ export default function InstallButton() {
       setPromptEvent(null);
       return;
     }
-    setHint((v) => !v);
+    setShowGuide(true);
   };
 
   return (
-    <div className="flex flex-col gap-1">
+    <>
       <button
         type="button"
         onClick={handleClick}
@@ -68,11 +75,13 @@ export default function InstallButton() {
         <Icon icon="tabler:device-mobile-down" width={18} />
         {t.installApp}
       </button>
-      {hint && (
-        <p className="text-[11px] leading-relaxed px-1" style={{ color: theme.textMuted }}>
-          {t.installHintIOS}
-        </p>
+
+      {showGuide && (
+        <InstallGuideModal
+          variant={isIOSSafari ? 'ios-safari' : isIOS ? 'ios-other' : 'desktop'}
+          onClose={() => setShowGuide(false)}
+        />
       )}
-    </div>
+    </>
   );
 }

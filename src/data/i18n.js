@@ -61,7 +61,36 @@ export const LANG = {
     letterAlreadyThere: 'sudah ada di kotak itu.',
     boxFull: '— kotak sudah penuh.',
     installApp: 'Install aplikasi',
-    installHintIOS: 'Di Safari iPhone: tap ikon Share di bawah, lalu pilih "Add to Home Screen".',
+    installGuide: {
+      'ios-safari': {
+        intro: 'iPhone dan iPad tidak punya tombol install otomatis, tapi app ini bisa ditaruh di layar utama lewat 3 langkah:',
+        steps: [
+          { icon: 'tabler:share-2', text: 'Tap ikon Bagikan (kotak dengan tanda panah ke atas) di bar bawah Safari.' },
+          { icon: 'tabler:square-rounded-plus', text: 'Geser daftarnya ke bawah, lalu pilih "Add to Home Screen" atau "Tambah ke Layar Utama".' },
+          { icon: 'tabler:check', text: 'Tap "Add" atau "Tambah" di kanan atas. Ikonnya langsung muncul di layar utama.' },
+        ],
+        note: 'Setelah itu app terbuka layar penuh tanpa bar Safari, dan tetap jalan tanpa internet.',
+      },
+      'ios-other': {
+        intro: 'Di iPhone dan iPad, menaruh app di layar utama paling mudah lewat Safari. Buka halaman ini di Safari dulu:',
+        steps: [
+          { icon: 'tabler:copy', text: 'Salin alamat halaman ini dari bar alamat browser.' },
+          { icon: 'tabler:compass', text: 'Buka Safari, lalu tempel alamatnya di bar alamat.' },
+          { icon: 'tabler:share-2', text: 'Tap ikon Bagikan di bar bawah Safari.' },
+          { icon: 'tabler:square-rounded-plus', text: 'Pilih "Add to Home Screen", lalu tap "Add".' },
+        ],
+        note: 'Chrome dan Firefox di iOS juga punya menu "Tambah ke Layar Utama" mulai iOS 16.4, letaknya di menu Bagikan.',
+      },
+      desktop: {
+        intro: 'Browser ini belum menawarkan install otomatis. Coba salah satu cara berikut:',
+        steps: [
+          { icon: 'tabler:download', text: 'Cari ikon install di ujung kanan bar alamat, biasanya berbentuk monitor dengan tanda panah.' },
+          { icon: 'tabler:dots-vertical', text: 'Atau buka menu browser, lalu cari "Install" atau "Add to Home screen".' },
+          { icon: 'tabler:lock', text: 'Pastikan halaman dibuka lewat https, karena install hanya tersedia di koneksi aman.' },
+        ],
+        note: 'Install didukung Chrome, Edge, dan Brave di Windows, macOS, Linux, dan Android. Safari desktop belum mendukungnya.',
+      },
+    },
     highContrast: 'Kontras tinggi',
     highContrastNote: 'Hitam pekat (#000) untuk layar AMOLED, atau putih bersih di mode terang. Warna hijau dan kuning tetap.',
     showHints: 'Petunjuk & penjelasan',
@@ -183,7 +212,36 @@ export const LANG = {
     letterAlreadyThere: 'is already in that box.',
     boxFull: '— the box is full.',
     installApp: 'Install app',
-    installHintIOS: 'On iPhone Safari: tap the Share icon below, then choose "Add to Home Screen".',
+    installGuide: {
+      'ios-safari': {
+        intro: 'iPhone and iPad have no automatic install button, but this app can go on your home screen in 3 steps:',
+        steps: [
+          { icon: 'tabler:share-2', text: 'Tap the Share icon (a box with an arrow pointing up) in Safari\'s bottom bar.' },
+          { icon: 'tabler:square-rounded-plus', text: 'Scroll the list down and choose "Add to Home Screen".' },
+          { icon: 'tabler:check', text: 'Tap "Add" in the top right. The icon appears on your home screen straight away.' },
+        ],
+        note: 'After that the app opens full screen without Safari\'s bars, and keeps working offline.',
+      },
+      'ios-other': {
+        intro: 'On iPhone and iPad, the home screen shortcut is easiest from Safari. Open this page there first:',
+        steps: [
+          { icon: 'tabler:copy', text: 'Copy this page\'s address from your browser\'s address bar.' },
+          { icon: 'tabler:compass', text: 'Open Safari and paste the address in.' },
+          { icon: 'tabler:share-2', text: 'Tap the Share icon in Safari\'s bottom bar.' },
+          { icon: 'tabler:square-rounded-plus', text: 'Choose "Add to Home Screen", then tap "Add".' },
+        ],
+        note: 'Chrome and Firefox on iOS have an "Add to Home Screen" item too since iOS 16.4, inside their Share menu.',
+      },
+      desktop: {
+        intro: 'This browser has not offered an automatic install. Try one of these:',
+        steps: [
+          { icon: 'tabler:download', text: 'Look for the install icon at the right end of the address bar — usually a monitor with an arrow.' },
+          { icon: 'tabler:dots-vertical', text: 'Or open the browser menu and look for "Install" or "Add to Home screen".' },
+          { icon: 'tabler:lock', text: 'Make sure the page is on https: installation is only offered over a secure connection.' },
+        ],
+        note: 'Installing works in Chrome, Edge and Brave on Windows, macOS, Linux and Android. Desktop Safari does not support it yet.',
+      },
+    },
     highContrast: 'High contrast',
     highContrastNote: 'True black (#000) for AMOLED screens, or clean white in light mode. Green and yellow stay as they are.',
     showHints: 'Hints & explanations',

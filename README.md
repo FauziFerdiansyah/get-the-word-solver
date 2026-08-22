@@ -28,7 +28,7 @@ A lightweight, mobile-first web app to help you solve **Wordle** and **Get the W
 - **Random word** — drawn from the top-ranked words only, never the obscure tail
 - **Coach mark tutorial** — step-by-step guide for first-time users
 - **Mobile-first responsive** — fluid tiles that fit a 320px phone at every word length, 10-column keyboard grid, 44px tap targets, and 16px inputs so iOS never zooms on focus; desktop shows a 50/50 split
-- **Installable (PWA)** — real install button on Android, Add to Home Screen on iOS, with correctly sized 192/512/maskable icons
+- **Installable (PWA)** — one-tap install where the browser supports it, plus an illustrated step-by-step guide on iOS; correctly sized 192/512/maskable icons and a top bar that matches the theme
 - **100% static** — deploys to GitHub Pages with zero backend
 - **Goey toast notifications** — smooth feedback on settings changes
 - **Dark-mode safe** — every surface is themed, including empty states and conflict warnings

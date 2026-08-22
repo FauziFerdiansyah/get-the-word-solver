@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { gooeyToast } from 'goey-toast';
 import { useTheme } from '../contexts/ThemeContext';
-import { playKeySound, playErrorSound } from '../utils/sound';
+import { playKeySound, playDeleteSound, playErrorSound } from '../utils/sound';
 
 // A position can be ruled out for at most one letter per guess, and the game
 // gives six guesses — so six is the ceiling when the setting is switched on.
@@ -54,8 +54,11 @@ export default function ClueGrid({
 
   const handleInput = (index, rawValue) => {
     const value = rawValue.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
+    const removed = !value && clues[index];
     onChange(index, value);
-    if (value && disabledLetters.has(value)) {
+    if (removed) {
+      if (soundEnabled) playDeleteSound();
+    } else if (value && disabledLetters.has(value)) {
       flagConflict(index);
     } else if (value) {
       if (soundEnabled) playKeySound(value);
@@ -106,10 +109,9 @@ export default function ClueGrid({
     }
 
     onExcludedChange(index, value);
-    const last = value[value.length - 1];
-    if (last && soundEnabled && blocked.length === 0 && value.length > current.length) {
-      playKeySound(last);
-    }
+    if (!soundEnabled || blocked.length > 0) return;
+    if (value.length > current.length) playKeySound(value[value.length - 1]);
+    else if (value.length < current.length) playDeleteSound();
   };
 
   const getBoxStyle = (letter, state) => {

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { playKeySound } from '../utils/sound';
+import { playKeySound, playDeleteSound } from '../utils/sound';
 
 const NEXT_STATE = { gray: 'green', green: 'yellow', yellow: 'gray' };
 
@@ -20,8 +20,12 @@ export default function BoardGrid({ rows, onLetterChange, onStateToggle }) {
 
   const handleInput = (row, col, rawValue) => {
     const value = rawValue.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
+    const removed = !value && rows[row].letters[col];
     onLetterChange(row, col, value);
-    if (!value) return;
+    if (!value) {
+      if (removed && soundEnabled) playDeleteSound();
+      return;
+    }
     if (soundEnabled) playKeySound(value);
     if (col < wordLength - 1) focusCell(row, col + 1);
     else if (row < rows.length - 1) focusCell(row + 1, 0);

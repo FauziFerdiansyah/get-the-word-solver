@@ -5,6 +5,24 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.4.0
+
+- **Delete sound.** The sprite gained a 27th slot from the pack's real Backspace
+  recording (keycode 14), rather than reusing a letter. `SPRITE_LAYOUT` is now
+  `[...letters, 'BACKSPACE']` and a test compares it against the generator's
+  `LAYOUT`, so the two cannot drift.
+- **theme-color.** The installed app showed a green stripe above a dark page
+  because the meta tag kept the manifest's brand colour. It now tracks
+  `theme.bg` from ThemeContext, which makes it compose with all six themes, dark
+  mode and high contrast for free.
+- **iOS install guide.** iOS never fires `beforeinstallprompt`, so the button used
+  to show a single line of text. Replaced with a modal of numbered steps and
+  icons, in three variants. iPadOS 13+ reports a Mac UA, so detection also checks
+  `navigator.maxTouchPoints`; non-Safari iOS browsers get pointed at Safari, since
+  that is where the Share sheet reliably has "Add to Home Screen".
+
+---
+
 ## 2026-08-23 — v2.3.0
 
 Six items from a single round of feedback.

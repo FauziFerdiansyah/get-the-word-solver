@@ -12,7 +12,8 @@
 // roll off hard below that.
 
 const KEY_SPRITE = './keys.mp3';
-const SPRITE_LAYOUT = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+// Letters in QWERTY order, then Backspace — must match build-key-sounds.mjs.
+const SPRITE_LAYOUT = [...'QWERTYUIOPASDFGHJKLZXCVBNM', 'BACKSPACE'];
 const SPRITE_SLOT = 0.3; // seconds per letter, must match build-key-sounds.mjs
 const ERROR_SOUND = './error.wav';
 const BELL_SOUND = './bell.wav';
@@ -244,9 +245,9 @@ function press(ctx, letter, level, offset = 0) {
   });
 }
 
-// Plays one letter's slot out of the sprite.
-function sample(ctx, letter, level, offset = 0) {
-  const index = SPRITE_LAYOUT.indexOf(letter.toUpperCase());
+// Plays one key's slot out of the sprite.
+function sample(ctx, key, level, offset = 0) {
+  const index = SPRITE_LAYOUT.indexOf(key.toUpperCase());
   const source = ctx.createBufferSource();
   source.buffer = keySprite;
   // A touch of pitch variation so holding a key down is not a machine gun.
@@ -265,6 +266,15 @@ export function playKeySound(letter = '') {
   withContext((ctx) => {
     if (keySprite) sample(ctx, letter, 0.85);
     else press(ctx, letter, 0.9);
+  });
+}
+
+// Deleting a letter is a keypress too — it plays the pack's own Backspace
+// recording, and a lower, shorter synth click when the sprite is not in yet.
+export function playDeleteSound() {
+  withContext((ctx) => {
+    if (keySprite) sample(ctx, 'BACKSPACE', 0.8);
+    else press(ctx, 'Z', 0.75);
   });
 }
 

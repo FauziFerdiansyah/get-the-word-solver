@@ -119,8 +119,10 @@ describe('key sound samples', () => {
     // The slot width has to agree between the generator and the player.
     expect(engine).toMatch(/SPRITE_SLOT = 0\.3/);
     expect(builder).toMatch(/SLOT_MS = 300/);
-    expect(engine).toMatch(/SPRITE_LAYOUT = 'QWERTYUIOPASDFGHJKLZXCVBNM'/);
-    expect(builder).toMatch(/LAYOUT = 'QWERTYUIOPASDFGHJKLZXCVBNM'/);
+    // 26 letters plus Backspace, in the same order on both sides.
+    const layout = /\[\.\.\.'QWERTYUIOPASDFGHJKLZXCVBNM', 'BACKSPACE'\]/;
+    expect(engine).toMatch(layout);
+    expect(builder).toMatch(layout);
   });
 
   it('credits the sample source', () => {

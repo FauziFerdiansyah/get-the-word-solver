@@ -6,12 +6,20 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "background_color": "#faf8f5",
-  "theme_color": "#16a34a",
+  "theme_color": "#faf8f5",
   "lang": "id",
   "dir": "ltr",
-  "categories": ["games", "utilities", "education"],
+  "categories": [
+    "games",
+    "utilities",
+    "education"
+  ],
   "icons": [
     {
       "src": "./icon-192.png",

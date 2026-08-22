@@ -76,6 +76,18 @@ export function ThemeProvider({ children }) {
       }
     : resolvedTheme;
 
+  // The installed app's top bar comes from <meta name="theme-color">. Left at the
+  // manifest's green it sat as a stripe above a dark page, so it tracks the page
+  // background instead: near-black in dark mode, near-white in light, and exactly
+  // #000/#fff with high contrast.
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', contrastTheme.bg);
+    const bar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    // iOS reads this once at launch, so it only takes effect next time.
+    if (bar) bar.setAttribute('content', darkMode ? 'black' : 'default');
+  }, [contrastTheme.bg, darkMode]);
+
   const t = LANG[lang] || LANG.id;
 
   return (
