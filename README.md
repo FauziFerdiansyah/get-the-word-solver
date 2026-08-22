@@ -22,7 +22,9 @@ A lightweight, mobile-first web app to help you solve **Wordle** and **Get the W
 - **Curated word list** — auto-generated and cross-checked against WordNet, two frequency corpora and the official Wordle answer list; no plurals, inflections, proper nouns, abbreviations or slang
 - **6 color themes** — Wordle Classic, Mint Fresh, Sunset Warm, Ocean Blue, Lavender Dream, + Colorblind mode
 - **Dark/Light mode** — neo-brutalism styling adapts beautifully to both
-- **Mechanical key sounds** — each letter has its own synthesised switch voice (leaf click + mid knock + case resonance + bottom-out tick), tuned to stay audible on phone speakers, with a quieter release click and a "Test" button in Settings
+- **Mechanical key sounds** — a real Cherry MX Blue recording per letter, 62 kB for all 26, with a synthesised fallback and a "Test" button in Settings
+- **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
+- **Hideable hints** — switch the explanations off once you know the app
 - **Random word** — drawn from the top-ranked words only, never the obscure tail
 - **Coach mark tutorial** — step-by-step guide for first-time users
 - **Mobile-first responsive** — fluid tiles that fit a 320px phone at every word length, 10-column keyboard grid, 44px tap targets, and 16px inputs so iOS never zooms on focus; desktop shows a 50/50 split
@@ -119,6 +121,7 @@ All themes support Dark Mode (except Buta Warna which stays consistent for acces
 get-the-word-solver/
 ├── public/
 │   ├── word.png          # App logo & favicon
+│   ├── keys.mp3          # Generated: 26 key samples, 300ms slots
 │   ├── error.wav         # Error sound effect
 │   └── bell.wav          # Success bell sound
 ├── src/
@@ -150,7 +153,8 @@ get-the-word-solver/
 │   ├── main.jsx          # Entry point
 │   └── index.css         # Global styles & Tailwind
 ├── scripts/
-│   └── build-words.mjs   # Regenerates src/data/words.js
+│   ├── build-words.mjs   # Regenerates src/data/words.js
+│   └── build-key-sounds.mjs  # Regenerates public/keys.mp3
 ├── .github/workflows/
 │   └── deploy.yml        # GitHub Actions auto-deploy
 ├── index.html
@@ -281,7 +285,7 @@ counts come mostly from being a name (`JOHN`, `BERLIN`).
 - **[Tailwind CSS 4](https://tailwindcss.com/)** — Utility-first styling
 - **[Iconify (Tabler)](https://iconify.design/)** — SVG icons
 - **[Goey Toast](https://github.com/anl331/goey-toast)** — Morphing toast notifications
-- **Web Audio API** — Per-key mechanical sounds synthesised at runtime, no sound pack to download
+- **Web Audio API** — Per-key sample playback from a single MP3 sprite, with a runtime synth fallback
 
 ---
 
@@ -321,3 +325,5 @@ SOFTWARE.
 - Frequency data from [Google 10,000 English](https://github.com/first20hours/google-10000-english)
 - Icons by [Tabler Icons](https://tabler.io/icons) via Iconify
 - Toast by [Goey Toast](https://github.com/anl331/goey-toast)
+- Key sounds: Cherry MX Blue samples from [Mechvibes](https://github.com/hainguyents13/mechvibes)
+  (MIT © 2021 Hai Nguyen), trimmed to the 26 letters by `scripts/build-key-sounds.mjs`

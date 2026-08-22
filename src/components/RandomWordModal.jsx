@@ -56,8 +56,10 @@ export default function RandomWordModal({ onClose, words, wordLength }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
+      {/* As wide as the input section: at max-w-xs a 6-letter word left the
+          tiles squeezed against the padding. */}
       <div
-        className="w-full max-w-xs rounded-xl border-2 p-4 sm:p-6 flex flex-col items-center gap-4"
+        className="w-full max-w-sm rounded-xl border-2 p-4 sm:p-6 flex flex-col items-center gap-4"
         style={{
           backgroundColor: theme.card,
           borderColor: theme.border,
@@ -69,11 +71,11 @@ export default function RandomWordModal({ onClose, words, wordLength }) {
           🎲 {t.randomTitle}
         </h3>
 
-        <div className="flex w-full justify-center gap-1.5" style={{ minHeight: '56px' }}>
+        <div className="flex w-full justify-center gap-2" style={{ minHeight: '64px' }}>
           {displayWord.split('').map((letter, i) => (
             <span
               key={i}
-              className="flex-1 max-w-10 aspect-[5/6] rounded-lg border-2 flex items-center justify-center text-lg sm:text-xl font-extrabold transition-all"
+              className="flex-1 max-w-12 aspect-square rounded-xl border-2 flex items-center justify-center text-xl sm:text-2xl font-extrabold transition-all"
               style={{
                 backgroundColor: shuffling ? theme.keyboard : theme.green,
                 color: shuffling ? theme.text : theme.textOnColor,

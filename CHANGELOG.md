@@ -4,6 +4,32 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.3.0 — 2026-08-23
+
+### Added
+
+- **Real key sounds.** Each letter now plays a Cherry MX Blue recording instead of
+  a synthesised voice, which sounded robotic because of its tonal component. The
+  26 samples come from the pack bundled with Mechvibes (MIT) and are trimmed into
+  a 62 kB MP3 sprite by `scripts/build-key-sounds.mjs` (`npm run build:sounds`).
+  The synth stays as the fallback until the sprite loads, or if it cannot.
+- **High contrast setting.** With dark mode it takes the surfaces to true black
+  (#000) for AMOLED screens; in light mode to pure white. Borders and text follow;
+  the green/yellow tile colours do not, since they mirror the game.
+- **Hints setting.** Switches off the explanatory texts — the "Kotak atas / Kotak
+  bawah" legend, the examples, the board hint and the ranking note.
+
+### Changed
+
+- The random word popup is as wide as an input section (`max-w-sm`) with square
+  tiles, so a 6-letter word no longer sits squeezed against the padding.
+- Removed the "Coret Huruf yang Tidak Ada" heading above the keyboard; it cost a
+  row of vertical space on a phone and the keys are self-explanatory.
+
+### Fixed
+
+- The dark mode setting was the only row without an icon.
+
 ## 2.2.0 — 2026-08-23
 
 ### Changed

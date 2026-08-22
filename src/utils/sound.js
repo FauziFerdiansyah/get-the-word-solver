@@ -1,24 +1,25 @@
 // Keyboard sound engine.
 //
-// Key presses are synthesised rather than sampled, so every letter gets its own
-// voice the way a Mechvibes pack does — without shipping a sound pack of
-// uncertain licensing, and without any download at all.
+// Key presses play a real Cherry MX Blue recording — one sample per letter, from
+// the pack bundled with Mechvibes (MIT, see scripts/build-key-sounds.mjs). The
+// 26 samples live in a single MP3 sprite of fixed 300 ms slots, so the slot for a
+// letter is just its index in `SPRITE_LAYOUT`.
 //
-// A mechanical switch is four things layered together:
-//   1. click   — a short filtered noise burst (the switch leaf)
-//   2. knock   — a mid-band burst that gives the press its body
-//   3. tone    — a fast decaying pitch (the plate and case resonating)
-//   4. bottom  — a faint high tick as the key bottoms out
-//
-// Frequencies are deliberately kept above ~240 Hz: phone speakers roll off hard
-// below that, and an earlier version voiced the body at 110–250 Hz, which made
-// the whole press nearly inaudible on a handset.
+// The synthesised voices below are the fallback for before the sprite has loaded
+// (the first press of a session) and for when it cannot be fetched at all. They
+// are built from a leaf click, a mid-band knock, a case resonance and a
+// bottom-out tick, with frequencies kept above ~240 Hz because phone speakers
+// roll off hard below that.
 
+const KEY_SPRITE = './keys.mp3';
+const SPRITE_LAYOUT = 'QWERTYUIOPASDFGHJKLZXCVBNM';
+const SPRITE_SLOT = 0.3; // seconds per letter, must match build-key-sounds.mjs
 const ERROR_SOUND = './error.wav';
 const BELL_SOUND = './bell.wav';
 
 let audioCtx = null;
 let noiseBuffer = null;
+let keySprite = null;
 let errorBuffer = null;
 let bellBuffer = null;
 
@@ -107,6 +108,12 @@ export async function warmUp() {
   if (!ctx) return;
   loaded = true;
   getNoise(ctx);
+  // The sprite is fetched on the first gesture rather than at page load, so a
+  // muted visitor never pays for it. That means the very first press of a
+  // session falls back to the synth; every press after it is the real sample.
+  loadBuffer(ctx, KEY_SPRITE)
+    .then((buffer) => { keySprite = buffer; })
+    .catch(() => { keySprite = null; });
   // Safari keeps a context asleep until something has actually been played, so
   // push one silent sample through it while we still hold the user gesture.
   try {
@@ -237,13 +244,35 @@ function press(ctx, letter, level, offset = 0) {
   });
 }
 
-// Key down: the full press, distinct per letter.
-export function playKeySound(letter = '') {
-  withContext((ctx) => press(ctx, letter, 0.9));
+// Plays one letter's slot out of the sprite.
+function sample(ctx, letter, level, offset = 0) {
+  const index = SPRITE_LAYOUT.indexOf(letter.toUpperCase());
+  const source = ctx.createBufferSource();
+  source.buffer = keySprite;
+  // A touch of pitch variation so holding a key down is not a machine gun.
+  source.playbackRate.value = jitter(1, 0.03);
+
+  const gain = ctx.createGain();
+  gain.gain.value = level;
+
+  source.connect(gain);
+  gain.connect(ctx.destination);
+  source.start(startTime(ctx) + offset, Math.max(index, 0) * SPRITE_SLOT, SPRITE_SLOT);
 }
 
-// Key up: quieter, brighter and shorter than the press.
+// Key down: a real switch recording once the sprite is in, the synth until then.
+export function playKeySound(letter = '') {
+  withContext((ctx) => {
+    if (keySprite) sample(ctx, letter, 0.85);
+    else press(ctx, letter, 0.9);
+  });
+}
+
+// Key up. The recorded samples already contain the whole travel of the switch,
+// including its release, so there is nothing to add on top of them — this only
+// fires for the synthesised fallback.
 export function playKeyUpSound(letter = '') {
+  if (keySprite) return;
   withContext((ctx) => {
     const voice = VOICES[letter.toUpperCase()] || DEFAULT_VOICE;
     const at = startTime(ctx);
@@ -267,7 +296,10 @@ export function playKeyUpSound(letter = '') {
 // all get scheduled inside the same user gesture.
 export function playTestSound() {
   withContext((ctx) => {
-    'KEYS'.split('').forEach((letter, i) => press(ctx, letter, 0.9, i * 0.13));
+    'KEYS'.split('').forEach((letter, i) => {
+      if (keySprite) sample(ctx, letter, 0.85, i * 0.16);
+      else press(ctx, letter, 0.9, i * 0.13);
+    });
   });
 }
 

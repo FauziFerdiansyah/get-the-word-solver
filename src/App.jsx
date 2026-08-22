@@ -320,13 +320,12 @@ export default function App() {
 
           {/* Tighter padding here: the keyboard wants every pixel of width it
               can get on a small phone. */}
+          {/* No heading: the keys speak for themselves and the row was eating
+              vertical space on a phone. */}
           <section
             className="rounded-xl border-2 p-2 sm:p-4 flex flex-col gap-3"
             style={{ backgroundColor: theme.accent2, borderColor: theme.border, boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
           >
-            <h2 className="text-sm font-bold text-center" style={{ color: theme.text }}>
-              {t.crossTitle}
-            </h2>
             <Keyboard disabledLetters={disabledLetters} letterColors={letterColors} onToggle={handleToggleLetter} />
           </section>
 

@@ -11,6 +11,8 @@ export function ThemeProvider({ children }) {
   const [showDefinition, setShowDefinition] = useState(() => localStorage.getItem('ws-def') === 'true');
   const [showKeyboardExtras, setShowKeyboardExtras] = useState(() => localStorage.getItem('ws-keys') === 'true');
   const [multiExcluded, setMultiExcluded] = useState(() => localStorage.getItem('ws-multi') === 'true');
+  const [highContrast, setHighContrast] = useState(() => localStorage.getItem('ws-contrast') === 'true');
+  const [showHints, setShowHints] = useState(() => localStorage.getItem('ws-hints') !== 'false');
   const [lang, setLang] = useState(() => localStorage.getItem('ws-lang') || 'id');
 
   useEffect(() => { localStorage.setItem('ws-theme', themeName); }, [themeName]);
@@ -19,6 +21,8 @@ export function ThemeProvider({ children }) {
   useEffect(() => { localStorage.setItem('ws-def', showDefinition); }, [showDefinition]);
   useEffect(() => { localStorage.setItem('ws-keys', showKeyboardExtras); }, [showKeyboardExtras]);
   useEffect(() => { localStorage.setItem('ws-multi', multiExcluded); }, [multiExcluded]);
+  useEffect(() => { localStorage.setItem('ws-contrast', highContrast); }, [highContrast]);
+  useEffect(() => { localStorage.setItem('ws-hints', showHints); }, [showHints]);
   useEffect(() => {
     localStorage.setItem('ws-lang', lang);
     document.documentElement.lang = lang;
@@ -29,7 +33,8 @@ export function ThemeProvider({ children }) {
     const html = document.documentElement;
     html.classList.remove('light-mode', 'dark-mode');
     html.classList.add(darkMode ? 'dark-mode' : 'light-mode');
-  }, [darkMode]);
+    html.classList.toggle('contrast-mode', highContrast);
+  }, [darkMode, highContrast]);
 
   const theme = THEMES[themeName] || THEMES.mint;
 
@@ -51,16 +56,38 @@ export function ThemeProvider({ children }) {
       }
     : theme;
 
+  // High contrast pushes the surfaces to pure black or pure white — true #000 for
+  // AMOLED screens — and takes borders and text with them. The semantic green /
+  // yellow / red stay as the theme defines them; they are the tile colours the
+  // game itself uses.
+  const contrastTheme = highContrast
+    ? {
+        ...resolvedTheme,
+        bg: darkMode ? '#000000' : '#ffffff',
+        card: darkMode ? '#000000' : '#ffffff',
+        accent: darkMode ? '#0d0d0d' : '#f4f4f5',
+        accent2: darkMode ? '#141417' : '#e8e8ea',
+        text: darkMode ? '#ffffff' : '#000000',
+        textMuted: darkMode ? '#d4d4d8' : '#27272a',
+        textOnColor: '#ffffff',
+        border: darkMode ? '#ffffff' : '#000000',
+        shadow: darkMode ? '#ffffff' : '#000000',
+        keyboard: darkMode ? '#1c1c1f' : '#e4e4e7',
+      }
+    : resolvedTheme;
+
   const t = LANG[lang] || LANG.id;
 
   return (
     <ThemeContext.Provider value={{
-      theme: resolvedTheme, themeName, setThemeName,
+      theme: contrastTheme, themeName, setThemeName,
       darkMode, setDarkMode,
       soundEnabled, setSoundEnabled,
       showDefinition, setShowDefinition,
       showKeyboardExtras, setShowKeyboardExtras,
       multiExcluded, setMultiExcluded,
+      highContrast, setHighContrast,
+      showHints, setShowHints,
       lang, setLang, t,
     }}>
       {children}

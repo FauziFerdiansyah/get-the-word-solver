@@ -99,7 +99,7 @@ export default function ResultsList({
   category,
   onCategoryChange,
 }) {
-  const { theme, t, lang } = useTheme();
+  const { theme, t, lang, showHints } = useTheme();
 
   const common = results.common || [];
   const rare = results.rare || [];
@@ -156,7 +156,7 @@ export default function ResultsList({
           {t.found}{' '}
           <span className="font-extrabold text-base" style={{ color: theme.text }}>{totalResults}</span>{' '}
           {t.matchWords}
-          <span className="block text-[11px] leading-snug">{t.rankHint}</span>
+          {showHints && <span className="block text-[11px] leading-snug">{t.rankHint}</span>}
         </p>
         <button
           onClick={handleCopyAll}

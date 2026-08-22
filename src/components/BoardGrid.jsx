@@ -11,7 +11,7 @@ const NEXT_STATE = { gray: 'green', green: 'yellow', yellow: 'gray' };
 // thumb can reliably hit. Arrow keys cycle the colour too, which keeps the board
 // usable from a physical keyboard without hunting for the chip.
 export default function BoardGrid({ rows, onLetterChange, onStateToggle }) {
-  const { theme, soundEnabled, t } = useTheme();
+  const { theme, soundEnabled, showHints, t } = useTheme();
   const inputRefs = useRef([]);
   const wordLength = rows[0]?.letters.length || 5;
 
@@ -117,9 +117,11 @@ export default function BoardGrid({ rows, onLetterChange, onStateToggle }) {
         ))}
       </div>
 
-      <p className="text-[11px] text-center leading-relaxed max-w-[21rem]" style={{ color: theme.textMuted }}>
-        {t.boardHint}
-      </p>
+      {showHints && (
+        <p className="text-[11px] text-center leading-relaxed max-w-[21rem]" style={{ color: theme.textMuted }}>
+          {t.boardHint}
+        </p>
+      )}
     </div>
   );
 }

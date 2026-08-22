@@ -5,6 +5,37 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.3.0
+
+Six items from a single round of feedback.
+
+- **Sound replaced with real samples.** The synth read as "robotic" because its
+  case-resonance layer is a tonal oscillator mapped to a musical scale — 26
+  letters became a melody. Real switch recordings have no clear pitch. Mechvibes
+  is MIT *and* bundles its audio in-repo (`src/audio/cherrymx-*/sound.ogg`), which
+  gave a defensible licence; its 2 MB whole-keyboard sprite was trimmed to the 26
+  letters and re-encoded as a 62 kB mono MP3.
+  - MP3, not the original Ogg Vorbis: Safari's Vorbis support in
+    `decodeAudioData` is unreliable and this has to work on iOS.
+  - Fixed 300 ms slots, sample at the slot start, silence after. The padding
+    absorbs the uniform decoder delay MP3 prepends to a decoded buffer, so no
+    per-letter offset table is needed.
+  - The sprite loads on the first user gesture, so the first press of a session
+    still uses the synth. Deliberate: a muted visitor should not pay 62 kB.
+- **High contrast** setting added to `ThemeContext`, layered on top of
+  `resolvedTheme` so it composes with all six themes and with dark mode.
+- **Hints** setting hides the explanatory copy in ClueGrid, BoardGrid and the
+  results header.
+- Dark mode row got the icon it was missing; random word modal widened to
+  `max-w-sm` with square tiles; keyboard heading removed.
+
+Testing note: Iconify fetches icon data over the network, so in jsdom it renders
+an empty placeholder instead of an `<svg>`. Asserting `querySelector('svg')` can
+never pass — assert the placeholder element instead, which still distinguishes a
+row that has an icon from one that does not.
+
+---
+
 ## 2026-08-23 — v2.2.0
 
 Walkthrough (CoachMark) rewritten after the user called it ugly and out of date.

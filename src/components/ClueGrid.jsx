@@ -37,7 +37,7 @@ export default function ClueGrid({
   onExcludedChange,
   disabledLetters,
 }) {
-  const { theme, soundEnabled, t } = useTheme();
+  const { theme, soundEnabled, showHints, t } = useTheme();
   const inputRefs = useRef([]);
   const [blinkIndex, setBlinkIndex] = useState(null);
 
@@ -127,7 +127,8 @@ export default function ClueGrid({
 
   return (
     <div className="flex flex-col items-center gap-3 select-none">
-      {/* Which box means what */}
+      {/* Which box means what — hidden once the user knows the app */}
+      {showHints && (
       <div className="flex flex-col items-start gap-1 text-[11px] font-semibold w-full max-w-[22rem]" style={{ color: theme.textMuted }}>
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3.5 h-3.5 rounded-md border shrink-0" style={{ backgroundColor: theme.green, borderColor: theme.border + '60' }} />
@@ -138,6 +139,7 @@ export default function ClueGrid({
           {t.clueYellowHint}
         </span>
       </div>
+      )}
 
       <div className="flex w-full max-w-[22rem] items-start justify-center gap-1.5 sm:gap-2">
         {clues.map((letter, index) => {
@@ -212,10 +214,12 @@ export default function ClueGrid({
         })}
       </div>
 
-      <p className="text-[11px] text-center leading-relaxed max-w-[22rem]" style={{ color: theme.textMuted }}>
-        {maxExcluded > 1 ? t.legendHintMulti : t.legendHint}
-        <span className="block mt-1 font-semibold">{t.clueDuplicateHint}</span>
-      </p>
+      {showHints && (
+        <p className="text-[11px] text-center leading-relaxed max-w-[22rem]" style={{ color: theme.textMuted }}>
+          {maxExcluded > 1 ? t.legendHintMulti : t.legendHint}
+          <span className="block mt-1 font-semibold">{t.clueDuplicateHint}</span>
+        </p>
+      )}
     </div>
   );
 }

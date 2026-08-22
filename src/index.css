@@ -29,6 +29,19 @@ html.dark-mode body {
   color: #f1f5f9 !important;
 }
 
+/* High contrast: pure black for AMOLED, pure white the other way. */
+html.contrast-mode.dark-mode,
+html.contrast-mode.dark-mode body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.contrast-mode.light-mode,
+html.contrast-mode.light-mode body {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }

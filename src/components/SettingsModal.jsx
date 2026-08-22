@@ -11,7 +11,8 @@ export default function SettingsModal({ open, onClose }) {
     theme, themeName, setThemeName, darkMode, setDarkMode,
     soundEnabled, setSoundEnabled, showDefinition, setShowDefinition,
     showKeyboardExtras, setShowKeyboardExtras,
-    multiExcluded, setMultiExcluded, lang, setLang, t,
+    multiExcluded, setMultiExcluded,
+    highContrast, setHighContrast, showHints, setShowHints, lang, setLang, t,
   } = useTheme();
 
   if (!open) return null;
@@ -47,6 +48,18 @@ export default function SettingsModal({ open, onClose }) {
       const state = getAudioState();
       gooeyToast(state === 'running' ? '🔊 ✓' : `🔇 audio: ${state}`, { duration: 2000 });
     }, 300);
+  };
+
+  const handleContrastToggle = () => {
+    const next = !highContrast;
+    setHighContrast(next);
+    gooeyToast(next ? `✓ ${t.highContrast}` : `✕ ${t.highContrast}`, { duration: 1500 });
+  };
+
+  const handleHintsToggle = () => {
+    const next = !showHints;
+    setShowHints(next);
+    gooeyToast(next ? `✓ ${t.showHints}` : `✕ ${t.showHints}`, { duration: 1500 });
   };
 
   const handleMultiExcludedToggle = () => {
@@ -142,7 +155,10 @@ export default function SettingsModal({ open, onClose }) {
 
         {/* Dark Mode Toggle */}
         <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
-          <span className="text-sm font-semibold" style={{ color: theme.text }}>{t.darkMode}</span>
+          <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
+            <Icon icon={darkMode ? 'tabler:moon' : 'tabler:sun'} width={18} />
+            {t.darkMode}
+          </span>
           <button
             onClick={handleDarkToggle}
             className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95"
@@ -182,6 +198,52 @@ export default function SettingsModal({ open, onClose }) {
             />
           </button>
           </div>
+        </div>
+
+        {/* High Contrast */}
+        <div className="flex items-start justify-between gap-3 py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex flex-col gap-0.5" style={{ color: theme.text }}>
+            <span className="flex items-center gap-2">
+              <Icon icon="tabler:contrast" width={18} />
+              {t.highContrast}
+            </span>
+            <span className="text-[11px] font-normal" style={{ color: theme.textMuted }}>
+              {t.highContrastNote}
+            </span>
+          </span>
+          <button
+            onClick={handleContrastToggle}
+            className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95 shrink-0"
+            style={{ borderColor: theme.border, backgroundColor: highContrast ? theme.green : theme.keyboard }}
+          >
+            <span
+              className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: highContrast ? '22px' : '2px' }}
+            />
+          </button>
+        </div>
+
+        {/* Hints Toggle */}
+        <div className="flex items-start justify-between gap-3 py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex flex-col gap-0.5" style={{ color: theme.text }}>
+            <span className="flex items-center gap-2">
+              <Icon icon="tabler:info-square-rounded" width={18} />
+              {t.showHints}
+            </span>
+            <span className="text-[11px] font-normal" style={{ color: theme.textMuted }}>
+              {t.showHintsNote}
+            </span>
+          </span>
+          <button
+            onClick={handleHintsToggle}
+            className="w-12 h-7 rounded-full border-2 relative transition-all active:scale-95 shrink-0"
+            style={{ borderColor: theme.border, backgroundColor: showHints ? theme.green : theme.keyboard }}
+          >
+            <span
+              className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+              style={{ backgroundColor: theme.card, border: `2px solid ${theme.border}`, left: showHints ? '22px' : '2px' }}
+            />
+          </button>
         </div>
 
         {/* Definition Toggle */}

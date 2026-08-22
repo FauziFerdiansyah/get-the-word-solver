@@ -56,9 +56,29 @@ Bump: **MINOR**.
 
 Bump: **MINOR**.
 
-## Tune the key sounds
+## Change or regenerate the key sounds
 
-Everything is in `src/utils/sound.js`:
+The 26 letter samples live in `public/keys.mp3`, generated from the Mechvibes
+Cherry MX Blue pack:
+
+```bash
+npm run build:sounds     # needs ffmpeg and curl
+```
+
+To switch packs, change `PACK` in `scripts/build-key-sounds.mjs` to another
+directory under `src/audio/` in the Mechvibes repo. Keep `SLOT_MS` in step with
+`SPRITE_SLOT` in `src/utils/sound.js` — a test compares the two. Encode to MP3,
+not Ogg: Safari cannot reliably decode Vorbis.
+
+Attribution is required (MIT); it lives in the README acknowledgments and a test
+checks it is still there.
+
+Bump: **MINOR**.
+
+## Tune the fallback synth
+
+Used until the sprite loads, and whenever it cannot be fetched. Everything is in
+`src/utils/sound.js`:
 
 - `VOICES` — per-letter click / knock / tone / tick frequencies
 - `press()` — per-layer gains and decays
