@@ -4,6 +4,29 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.14.1 — 2026-08-23
+
+### Fixed
+
+- **Key sounds lagged behind the keypress, worst on iPhone.** Two causes, both
+  measured and both addressed:
+  - The sound waited for the input's change event. It now plays on keydown, which
+    fires before the value updates, and the change handler no longer repeats it.
+  - Each recording began with a few milliseconds of room tone — 6.4 ms on average
+    and up to 17 ms — and playback starts at a fixed slot boundary, so that
+    silence was pure delay. The generator strips it, bringing the average to
+    2.8 ms.
+
+### Notes
+
+- Gateron packs do exist on mechvibes.com, but that page carries no licence, terms
+  or author credit — the packs are community uploads. The packs inside the
+  Mechvibes repository are MIT and are what this app ships. Gateron therefore stays
+  out; it is a licensing limit, not a technical one.
+- What remains of the iOS delay is the platform's own: Safari's audio output
+  latency and its software keyboard's event timing are not reachable from a web
+  page.
+
 ## 2.14.0 — 2026-08-23
 
 ### Added

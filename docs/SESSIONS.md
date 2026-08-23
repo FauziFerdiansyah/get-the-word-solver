@@ -5,6 +5,32 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.14.1
+
+Chased the reported iOS sound delay by measuring rather than guessing.
+
+- **Suspected MP3 decoder padding first, and it was not the culprit.** Decoding
+  `cherrymx-blue.mp3` gave exactly 27 × 9600 frames, so ffmpeg honoured the
+  gapless header and added no net offset. What it did show: each slot began with
+  2–17 ms of room tone (mean 6.4 ms). Playback starts at a fixed slot boundary, so
+  every one of those milliseconds is unrecoverable delay. Added
+  `silenceremove=start_threshold=-50dB` to the generator — mean is now 2.8 ms.
+  Fixing the asset beats storing per-slot offsets the player has to apply.
+- **The bigger cause was event timing.** Sound fired from React's `onChange`;
+  keydown lands before the value is even updated. Both grids now play on keydown
+  and mark a ref so the change handler does not repeat it. The ref matters: without
+  it every keystroke would sound twice, and a test asserts one keystroke costs the
+  same number of audio nodes as the first.
+- **Left alone, honestly:** Safari's own output latency and iOS software-keyboard
+  event timing. Neither is reachable from a page.
+
+Gateron: the packs on mechvibes.com are real, but that page has no licence, terms
+or author credit — they are community uploads, and the only links on it are a
+Discord invite and the MIT repo. The repo has no Gateron. Bundling them would mean
+redistributing someone's recordings without permission, so they stay out.
+
+---
+
 ## 2026-08-23 — v2.14.0
 
 - **The toast description bug was mine.** v2.11.0 added `display: flex` to

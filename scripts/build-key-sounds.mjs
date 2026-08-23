@@ -91,15 +91,24 @@ function buildPack({ id, pack }) {
   for (const key of LAYOUT) {
     const [startMs, durationMs] = config.defines[String(KEY_CODES[key])];
     const slot = path.join(work, `${key}.wav`);
-    // Trim to the sample, then pad the slot out with silence so every slot is
-    // the same width. `apad` needs the total length, not the amount of padding.
+    // Trim to the sample, drop the silence in front of its attack, then pad the
+    // slot out so every slot is the same width. `apad` needs the total length,
+    // not the amount of padding.
+    //
+    // The `silenceremove` step is what keeps latency down: each recording starts
+    // with a few milliseconds of room tone (measured 2–17 ms across this pack),
+    // and every one of those milliseconds is delay the player cannot recover,
+    // because playback starts at the slot boundary.
     run('ffmpeg', [
       '-hide_banner', '-loglevel', 'error', '-y',
       '-ss', String(startMs / 1000),
       '-t', String(durationMs / 1000),
       '-i', spritePath,
       '-ac', '1', '-ar', '32000',
-      '-af', `apad=whole_dur=${SLOT_MS / 1000}`,
+      '-af', [
+        'silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0',
+        `apad=whole_dur=${SLOT_MS / 1000}`,
+      ].join(','),
       slot,
     ]);
     slots.push(slot);

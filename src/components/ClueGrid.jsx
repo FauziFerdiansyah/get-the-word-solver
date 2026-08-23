@@ -39,6 +39,9 @@ export default function ClueGrid({
 }) {
   const { theme, soundEnabled, showHints, t } = useTheme();
   const inputRefs = useRef([]);
+  // Set when a keydown already played the sound, so the change handler that
+  // follows does not play it a second time.
+  const soundedRef = useRef(false);
   const [blinkIndex, setBlinkIndex] = useState(null);
 
   useEffect(() => {
@@ -55,18 +58,35 @@ export default function ClueGrid({
   const handleInput = (index, rawValue) => {
     const value = rawValue.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
     const removed = !value && clues[index];
+    const alreadySounded = soundedRef.current;
+    soundedRef.current = false;
     onChange(index, value);
     if (removed) {
-      if (soundEnabled) playDeleteSound();
+      if (soundEnabled && !alreadySounded) playDeleteSound();
     } else if (value && disabledLetters.has(value)) {
       flagConflict(index);
     } else if (value) {
-      if (soundEnabled) playKeySound(value);
+      if (soundEnabled && !alreadySounded) playKeySound(value);
       if (index < clues.length - 1) inputRefs.current[index + 1]?.focus();
     }
   };
 
+  // Sound plays here rather than waiting for the change event. keydown fires
+  // before the value is updated, and on iOS the gap between the two is wide
+  // enough to hear — the click used to trail the keypress.
   const handleKeyDown = (index, e) => {
+    if (soundEnabled && /^[a-zA-Z]$/.test(e.key)) {
+      const letter = e.key.toUpperCase();
+      if (!disabledLetters.has(letter)) {
+        playKeySound(letter);
+        soundedRef.current = true;
+      }
+    } else if (e.key === 'Backspace' && clues[index]) {
+      if (soundEnabled) {
+        playDeleteSound();
+        soundedRef.current = true;
+      }
+    }
     if (e.key === 'Backspace' && !clues[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -108,10 +128,29 @@ export default function ClueGrid({
       gooeyToast.warning(`${[...new Set(duplicates)].join(', ')} ${reason}`, { duration: 3000 });
     }
 
+    const alreadySounded = soundedRef.current;
+    soundedRef.current = false;
     onExcludedChange(index, value);
-    if (!soundEnabled || blocked.length > 0) return;
+    if (!soundEnabled || blocked.length > 0 || alreadySounded) return;
     if (value.length > current.length) playKeySound(value[value.length - 1]);
     else if (value.length < current.length) playDeleteSound();
+  };
+
+  // Same reasoning as the green boxes: play on keydown, not on change.
+  const handleExcludedKeyDown = (index, e) => {
+    if (!soundEnabled) return;
+    const strip = (excluded[index] || '').slice(0, maxExcluded);
+    if (/^[a-zA-Z]$/.test(e.key)) {
+      const letter = e.key.toUpperCase();
+      const wouldChange = !disabledLetters.has(letter) && !strip.includes(letter) && strip.length < maxExcluded;
+      if (wouldChange) {
+        playKeySound(letter);
+        soundedRef.current = true;
+      }
+    } else if (e.key === 'Backspace' && strip.length > 0) {
+      playDeleteSound();
+      soundedRef.current = true;
+    }
   };
 
   const getBoxStyle = (letter, state) => {
@@ -192,6 +231,7 @@ export default function ClueGrid({
               <textarea
                 value={[strip.slice(0, PER_ROW), strip.slice(PER_ROW)].filter(Boolean).join('\n')}
                 onChange={(e) => handleExcludedInput(index, e.target.value)}
+                onKeyDown={(e) => handleExcludedKeyDown(index, e)}
                 rows={strip.length > PER_ROW ? 2 : 1}
                 inputMode="text"
                 autoCapitalize="characters"

@@ -13,6 +13,8 @@ const NEXT_STATE = { gray: 'green', green: 'yellow', yellow: 'gray' };
 export default function BoardGrid({ rows, onLetterChange, onStateToggle }) {
   const { theme, soundEnabled, showHints, t } = useTheme();
   const inputRefs = useRef([]);
+  // Set when a keydown already played the sound for this keystroke.
+  const soundedRef = useRef(false);
   const wordLength = rows[0]?.letters.length || 5;
 
   const refKey = (row, col) => row * wordLength + col;
@@ -21,18 +23,29 @@ export default function BoardGrid({ rows, onLetterChange, onStateToggle }) {
   const handleInput = (row, col, rawValue) => {
     const value = rawValue.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
     const removed = !value && rows[row].letters[col];
+    const alreadySounded = soundedRef.current;
+    soundedRef.current = false;
     onLetterChange(row, col, value);
     if (!value) {
-      if (removed && soundEnabled) playDeleteSound();
+      if (removed && soundEnabled && !alreadySounded) playDeleteSound();
       return;
     }
-    if (soundEnabled) playKeySound(value);
+    if (soundEnabled && !alreadySounded) playKeySound(value);
     if (col < wordLength - 1) focusCell(row, col + 1);
     else if (row < rows.length - 1) focusCell(row + 1, 0);
   };
 
   const handleKeyDown = (row, col, e) => {
     const state = rows[row].states[col] || 'gray';
+    // Played here rather than on change: keydown lands first, and on iOS the gap
+    // is wide enough to hear the click trailing the keypress.
+    if (soundEnabled && /^[a-zA-Z]$/.test(e.key)) {
+      playKeySound(e.key.toUpperCase());
+      soundedRef.current = true;
+    } else if (soundEnabled && e.key === 'Backspace' && rows[row].letters[col]) {
+      playDeleteSound();
+      soundedRef.current = true;
+    }
     if (e.key === 'Backspace' && !rows[row].letters[col]) {
       if (col > 0) focusCell(row, col - 1);
       else if (row > 0) focusCell(row - 1, wordLength - 1);
