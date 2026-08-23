@@ -9,7 +9,7 @@ import { gooeyToast } from 'goey-toast';
 
 const themeKeys = Object.keys(THEMES);
 
-export default function SettingsModal({ open, onClose, snapshot, onRestoreSession }) {
+export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
   const [showSessions, setShowSessions] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const {
@@ -20,29 +20,27 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
     highContrast, setHighContrast, showHints, setShowHints, lang, setLang, t,
   } = useTheme();
 
-  if (!open) return null;
-
   const handleThemeChange = (key) => {
     setThemeName(key);
-    gooeyToast(`${THEMES[key].name} ✓`, { duration: 1500 });
+    gooeyToast.success(THEMES[key].name, { duration: 2500 });
   };
 
   const handleDarkToggle = () => {
     const next = !darkMode;
     setDarkMode(next);
-    gooeyToast(next ? 'Dark mode ✓' : 'Light mode ✓', { duration: 1500 });
+    gooeyToast.info(next ? t.darkMode : t.lightMode, { duration: 2500 });
   };
 
   const handleSoundToggle = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
-    gooeyToast(next ? '🔊 ON' : '🔇 OFF', { duration: 1500 });
+    (next ? gooeyToast.success : gooeyToast.info)(`${t.soundEffect}: ${next ? t.on : t.off}`, { duration: 2500 });
   };
 
   const handleDefToggle = () => {
     const next = !showDefinition;
     setShowDefinition(next);
-    gooeyToast(next ? '📖 ON' : '📖 OFF', { duration: 1500 });
+    (next ? gooeyToast.success : gooeyToast.info)(`${t.showDef}: ${next ? t.on : t.off}`, { duration: 2500 });
   };
 
   // Reports what the audio engine is actually doing, so "no sound" can be told
@@ -51,38 +49,39 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
     playTestSound();
     setTimeout(() => {
       const state = getAudioState();
-      gooeyToast(state === 'running' ? '🔊 ✓' : `🔇 audio: ${state}`, { duration: 2000 });
+      if (state === 'running') gooeyToast.success(t.soundWorking, { duration: 3000 });
+      else gooeyToast.error(`${t.soundBlocked} (${state})`, { duration: 4000 });
     }, 300);
   };
 
   const handleContrastToggle = () => {
     const next = !highContrast;
     setHighContrast(next);
-    gooeyToast(next ? `✓ ${t.highContrast}` : `✕ ${t.highContrast}`, { duration: 1500 });
+    (next ? gooeyToast.success : gooeyToast.info)(`${t.highContrast}: ${next ? t.on : t.off}`, { duration: 2500 });
   };
 
   const handleHintsToggle = () => {
     const next = !showHints;
     setShowHints(next);
-    gooeyToast(next ? `✓ ${t.showHints}` : `✕ ${t.showHints}`, { duration: 1500 });
+    (next ? gooeyToast.success : gooeyToast.info)(`${t.showHints}: ${next ? t.on : t.off}`, { duration: 2500 });
   };
 
   const handleMultiExcludedToggle = () => {
     const next = !multiExcluded;
     setMultiExcluded(next);
-    gooeyToast(next ? `✓ ${t.multiExcluded}` : `✕ ${t.multiExcluded}`, { duration: 1500 });
+    (next ? gooeyToast.success : gooeyToast.info)(`${t.multiExcluded}: ${next ? t.on : t.off}`, { duration: 2500 });
   };
 
   const handleKeyboardExtrasToggle = () => {
     const next = !showKeyboardExtras;
     setShowKeyboardExtras(next);
-    gooeyToast(next ? '⌨️ ON' : '⌨️ OFF', { duration: 1500 });
+    (next ? gooeyToast.success : gooeyToast.info)(`${t.showKeyboardExtras}: ${next ? t.on : t.off}`, { duration: 2500 });
   };
 
   const handleLangSelect = (newLang) => {
     if (lang !== newLang) {
       setLang(newLang);
-      gooeyToast(newLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English', { duration: 1500 });
+      gooeyToast.info(newLang === 'id' ? 'Bahasa Indonesia' : 'English', { duration: 2500 });
     }
   };
 
@@ -177,18 +176,24 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
         </div>
 
         {/* Sound Toggle */}
-        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: theme.border + '40' }}>
-          <span className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.text }}>
-            <Icon icon={soundEnabled ? 'tabler:volume' : 'tabler:volume-off'} width={18} />
-            {t.soundEffect}
+        <div className="flex items-start justify-between gap-3 py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+          <span className="text-sm font-semibold flex flex-col gap-0.5" style={{ color: theme.text }}>
+            <span className="flex items-center gap-2">
+              <Icon icon={soundEnabled ? 'tabler:volume' : 'tabler:volume-off'} width={18} />
+              {t.soundEffect}
+            </span>
+            <span className="text-[11px] font-normal" style={{ color: theme.textMuted }}>
+              {t.soundEffectNote}
+            </span>
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {soundEnabled && (
               <button
                 onClick={handleTestSound}
-                className="px-2.5 py-1.5 rounded-lg border-2 text-xs font-bold active:scale-95 transition-transform touch-manipulation"
+                className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg border-2 text-xs font-bold shrink-0 active:scale-95 transition-transform touch-manipulation"
                 style={{ borderColor: theme.border, backgroundColor: theme.keyboard, color: theme.text }}
               >
+                <Icon icon="tabler:music" width={14} />
                 {t.testSound}
               </button>
             )}

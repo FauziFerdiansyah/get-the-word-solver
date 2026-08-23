@@ -4,6 +4,28 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.11.0 — 2026-08-23
+
+### Changed
+
+- Wording: **Mode Malam** and **Efek Suara Ketik** in Indonesian, "Night Mode" and
+  "Typing Sound Effect" in English. The sessions popup is "Load" rather than
+  "Open" — "Save & Load Session" in English, "Simpan & Buka Sesi" in Indonesian.
+- The sound setting now explains what it plays, and its Test button has an icon.
+- **Toasts run a second longer** (2.5s and up) and their text is centred; the
+  library's own title padding was lopsided, which left labels sitting off-centre.
+- Every toast now carries a type — success, error, warning or info — instead of
+  emoji glued into the message. Toggles say what they turned on or off in the
+  user's language rather than "🔊 ON".
+
+### Fixed
+
+- Reopening Settings reopened whichever popup was last on screen: the sheet kept
+  its own state while hidden. It is unmounted when closed now, so loading a
+  session leaves Settings closed and reopening it lands on Settings.
+- Copying one suggestion no longer raises a toast. The button confirms it: the
+  icon becomes a tick for a moment.
+
 ## 2.10.0 — 2026-08-23
 
 ### Added

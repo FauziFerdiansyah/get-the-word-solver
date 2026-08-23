@@ -231,7 +231,7 @@ describe('session popup', () => {
   it('titles the section in capitals as asked', () => {
     renderApp();
     expect(LANG_TITLES.id).toBe('Simpan & Buka Sesi');
-    expect(LANG_TITLES.en).toBe('Save & Open Sessions');
+    expect(LANG_TITLES.en).toBe('Save & Load Session');
   });
 
   it('shows the day, month, year and time to the second', async () => {

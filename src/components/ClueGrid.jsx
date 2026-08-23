@@ -100,12 +100,12 @@ export default function ClueGrid({
     const value = kept.join('');
     if (blocked.length > 0) {
       flagConflict(index);
-      gooeyToast(`${[...new Set(blocked)].join(', ')} ${t.letterCrossedOut}`, { duration: 2200 });
+      gooeyToast.warning(`${[...new Set(blocked)].join(', ')} ${t.letterCrossedOut}`, { duration: 3500 });
     } else if (typed.length > current.length && value.length === current.length) {
       // The user typed something and the box did not grow — say what happened.
       const reason = kept.length >= maxExcluded ? t.boxFull : t.letterAlreadyThere;
       flagConflict(index);
-      gooeyToast(`${[...new Set(duplicates)].join(', ')} ${reason}`, { duration: 2000 });
+      gooeyToast.warning(`${[...new Set(duplicates)].join(', ')} ${reason}`, { duration: 3000 });
     }
 
     onExcludedChange(index, value);

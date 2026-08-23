@@ -347,7 +347,7 @@ export default function App() {
   return (
     <div className="min-h-screen w-full transition-colors" style={{ backgroundColor: theme.bg }} onPointerDown={warmUp}>
       <LaunchScreen />
-      <GooeyToaster position="bottom-center" expand={true} visibleToasts={3} duration={1500} preset="snappy" />
+      <GooeyToaster position="bottom-center" expand={true} visibleToasts={3} duration={2500} preset="snappy" />
 
       <main className="w-full max-w-5xl mx-auto px-3 py-4 sm:px-4 sm:py-6 lg:py-10">
         {/* Header keeps the icons in the flow so a long subtitle can never
@@ -496,12 +496,16 @@ export default function App() {
         onCancel={() => setPendingReset(false)}
       />
 
-      <SettingsModal
-        open={showSettings}
-        onClose={() => setShowSettings(false)}
-        snapshot={snapshotSession}
-        onRestoreSession={restoreSession}
-      />
+      {/* Mounted only while open: the sheet holds its own state for the sessions
+          and changelog popups, and keeping it mounted meant reopening Settings
+          reopened whichever popup was last on screen. */}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          snapshot={snapshotSession}
+          onRestoreSession={restoreSession}
+        />
+      )}
       <CoachMark open={showCoach} onClose={() => setShowCoach(false)} />
       {showRandom && (
         <RandomWordModal

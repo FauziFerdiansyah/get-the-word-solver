@@ -55,7 +55,7 @@ describe('delete sound', () => {
     await user.type(box, 'S');
 
     await user.click(screen.getByLabelText('Settings'));
-    const row = screen.getByText('Sound Effect').closest('div');
+    const row = screen.getByText('Efek Suara Ketik').closest('div');
     await user.click(row.querySelector('button[class*="rounded-full"]'));
     await user.click(screen.getByLabelText('Tutup'));
     clearLog();
@@ -87,7 +87,7 @@ describe('top bar colour', () => {
     const light = themeColor();
 
     await user.click(screen.getByLabelText('Settings'));
-    const row = screen.getByText('Dark Mode').closest('div');
+    const row = screen.getByText('Mode Malam').closest('div');
     await user.click(row.querySelector('button[class*="rounded-full"]'));
 
     expect(themeColor()).not.toBe(light);
@@ -97,7 +97,7 @@ describe('top bar colour', () => {
   it('is exactly black with dark mode and high contrast', async () => {
     const user = renderApp();
     await user.click(screen.getByLabelText('Settings'));
-    for (const label of ['Dark Mode', 'Kontras tinggi']) {
+    for (const label of ['Mode Malam', 'Kontras tinggi']) {
       const row = screen.getByText(label).closest('div');
       await user.click(row.querySelector('button[class*="rounded-full"]'));
     }

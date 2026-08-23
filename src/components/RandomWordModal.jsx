@@ -47,12 +47,12 @@ export default function RandomWordModal({ onClose, words, wordLength, fromResult
     navigator.clipboard
       .writeText(displayWord)
       .then(() => {
-        gooeyToast(`📋 "${displayWord}" ${t.copied}`, { duration: 1500 });
+        gooeyToast.success(`"${displayWord}" ${t.copied}`, { duration: 2500 });
       })
       .catch(() => {
-        gooeyToast('❌ Failed to copy', { duration: 1500 });
+        gooeyToast.error(t.copyFailed, { duration: 3000 });
       });
-  }, [displayWord, shuffling, t.copied]);
+  }, [displayWord, shuffling, t.copied, t.copyFailed]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>

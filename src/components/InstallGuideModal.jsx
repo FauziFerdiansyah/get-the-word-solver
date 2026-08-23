@@ -18,8 +18,8 @@ export default function InstallGuideModal({ variant, onClose }) {
   const copyAddress = () => {
     navigator.clipboard
       .writeText(window.location.href)
-      .then(() => gooeyToast(t.installAddressCopied, { duration: 1800 }))
-      .catch(() => gooeyToast(window.location.href, { duration: 4000 }));
+      .then(() => gooeyToast.success(t.installAddressCopied, { duration: 2800 }))
+      .catch(() => gooeyToast.error(window.location.href, { duration: 5000 }));
   };
 
   return (

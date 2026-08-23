@@ -5,6 +5,26 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.11.0
+
+- **Settings popups leaked between openings.** `SettingsModal` returned `null`
+  when closed but stayed mounted, so its `showSessions` / `showChangelog` state
+  survived — reopening Settings reopened whatever was last shown. Now mounted
+  conditionally from App. Any component that owns popup state and hides itself
+  with an early `return null` has this bug waiting.
+- **Toasts.** `gooeyToast` exposes `.success`, `.error`, `.warning` and `.info`;
+  every call site now picks one instead of prefixing emoji. Durations went up by a
+  second across the board — a test enforces a 2.5s floor so nothing slips back.
+  Centring needed CSS: `.gooey-content` had no flex of its own and `.gooey-title`
+  carries `padding: 0 4px 2px 2px`, which is what pushed labels off-centre.
+- **Single-word copy** shows a tick on the button for 1.2s rather than a toast.
+  A notification for an action the user just performed is noise; the toast stays
+  for Copy All, where the count matters.
+- Renamed labels, and the sound row now says what it plays (Cherry MX Blue
+  recordings) with an icon on its Test button.
+
+---
+
 ## 2026-08-23 — v2.10.0
 
 - **Stacked sticky bars.** The tier tabs stick under the Clues/Answers bar, whose

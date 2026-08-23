@@ -24,13 +24,16 @@ export default function SessionManager({ snapshot, onRestore, onClose }) {
     const saved = next.length !== sessions.length;
     setSessions(next);
     setName('');
-    gooeyToast(saved ? t.sessionSaved : t.sessionSaveFailed, { duration: 1800 });
+    (saved ? gooeyToast.success : gooeyToast.error)(
+      saved ? t.sessionSaved : t.sessionSaveFailed,
+      { duration: 2800 }
+    );
   };
 
   const handleRemove = (entry) => {
     setSessions(removeSession(entry.id));
     setConfirmingId(null);
-    gooeyToast(t.sessionRemoved, { duration: 1500 });
+    gooeyToast.info(t.sessionRemoved, { duration: 2500 });
   };
 
   const tileColor = (state) => {

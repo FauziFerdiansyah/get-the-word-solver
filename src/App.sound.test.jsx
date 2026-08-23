@@ -74,7 +74,7 @@ describe('sound wiring', () => {
   it('goes quiet when the sound setting is switched off', async () => {
     const user = setup();
     await user.click(screen.getByLabelText('Settings'));
-    await user.click(screen.getByText('Sound Effect').closest('div').querySelector('button[class*="rounded-full"]'));
+    await user.click(screen.getByText('Efek Suara Ketik').closest('div').querySelector('button[class*="rounded-full"]'));
     await user.click(screen.getByLabelText('Settings'));
     clearLog();
 

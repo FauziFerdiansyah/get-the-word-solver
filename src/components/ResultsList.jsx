@@ -28,10 +28,20 @@ function WordItem({ word, order, showDefinition, lang, tier }) {
     return () => { cancelled = true; };
   }, [word, showDefinition, lang]);
 
+  // Copying a single word gives its feedback on the button itself. A toast for
+  // every tap was noise on top of an action the user just performed.
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return undefined;
+    const timer = setTimeout(() => setCopied(false), 1200);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(word).then(() => {
-      gooeyToast(`"${word}" ${t.copied}`, { duration: 1000 });
-    });
+    navigator.clipboard
+      .writeText(word)
+      .then(() => setCopied(true))
+      .catch(() => gooeyToast.error(t.copyFailed, { duration: 3000 }));
   };
 
   return (
@@ -71,9 +81,14 @@ function WordItem({ word, order, showDefinition, lang, tier }) {
             borderColor: theme.border,
             boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
           }}
-          aria-label={`${t.copyWord} ${word}`}
+          aria-label={copied ? t.copiedInline : `${t.copyWord} ${word}`}
+          title={copied ? t.copiedInline : undefined}
         >
-          <Icon icon="tabler:copy" width={16} style={{ color: theme.text }} />
+          <Icon
+            icon={copied ? 'tabler:check' : 'tabler:copy'}
+            width={16}
+            style={{ color: copied ? theme.green : theme.text }}
+          />
         </button>
       </div>
       {showDefinition && def && (
@@ -157,9 +172,9 @@ export default function ResultsList({
     const text = wordsToCopy.map((w) => `- ${w}`).join('\n');
     navigator.clipboard.writeText(text).then(() => {
       if (currentResults.length > COPY_LIMIT) {
-        gooeyToast(`${t.copiedMax} ${currentResults.length} ${t.words}.`, { duration: 2000 });
+        gooeyToast.info(`${t.copiedMax} ${currentResults.length} ${t.words}.`, { duration: 3000 });
       } else {
-        gooeyToast(`${t.copiedAll}`, { duration: 1500 });
+        gooeyToast.success(t.copiedAll, { duration: 2500 });
       }
     });
   };

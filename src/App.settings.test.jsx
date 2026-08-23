@@ -32,7 +32,7 @@ describe('settings rows', () => {
     // empty placeholder element rather than an <svg>. The placeholder is still
     // proof that an <Icon> is there: a row without one starts with a text node.
     for (const label of [
-      'Dark Mode', 'Sound Effect', 'Kontras tinggi', 'Petunjuk & penjelasan',
+      'Mode Malam', 'Efek Suara Ketik', 'Kontras tinggi', 'Petunjuk & penjelasan',
       'Kotak kuning multi-huruf', 'Tombol Enter & Backspace',
     ]) {
       const row = screen.getByText(label).closest('span');
@@ -46,7 +46,7 @@ describe('settings rows', () => {
 describe('high contrast', () => {
   it('drops the surfaces to pure black with dark mode on', async () => {
     const user = setup();
-    await toggle(user, 'Dark Mode');
+    await toggle(user, 'Mode Malam');
     await toggle(user, 'Kontras tinggi');
 
     expect(document.documentElement.classList.contains('contrast-mode')).toBe(true);
