@@ -131,13 +131,28 @@ describe('findMatches', () => {
     }
   });
 
-  it('combines a green letter with a yellow copy of the same letter', () => {
-    // O confirmed at box 1 plus a yellow O elsewhere means two O's.
-    const matches = findMatches(words5, ['O', '', '', '', ''], ['', '', 'O', '', ''], new Set());
+  it('reads a green and a yellow of one letter as the same letter', () => {
+    // Finding T at position 5 and having learned T is not at position 3 are two
+    // facts about one T. Demanding two copies used to delete every real answer.
+    const matches = findMatches(
+      words5,
+      ['', '', '', '', 'T'],
+      ['AR', 'RA', 'TE', 'AE', ''],
+      new Set()
+    );
+    expect(matches).toContain('HEART');
+    for (const word of matches) {
+      expect(word[4]).toBe('T');
+      expect(word).toContain('A');
+      expect(word).toContain('R');
+      expect(word).toContain('E');
+    }
+  });
+
+  it('still counts two greens of the same letter as two', () => {
+    const matches = findMatches(words5, ['', 'O', 'O', '', ''], [], new Set());
     expect(matches.length).toBeGreaterThan(0);
     for (const word of matches) {
-      expect(word[0]).toBe('O');
-      expect(word[2]).not.toBe('O');
       expect(word.split('').filter((c) => c === 'O').length).toBeGreaterThanOrEqual(2);
     }
   });

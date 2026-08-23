@@ -1,4 +1,5 @@
 import { Icon } from '@iconify/react';
+import { gooeyToast } from 'goey-toast';
 import { useTheme } from '../contexts/ThemeContext';
 
 // iOS never fires `beforeinstallprompt`, so there is no one-tap install to offer.
@@ -13,6 +14,13 @@ import { useTheme } from '../contexts/ThemeContext';
 export default function InstallGuideModal({ variant, onClose }) {
   const { theme, t } = useTheme();
   const guide = t.installGuide[variant] || t.installGuide['ios-safari'];
+
+  const copyAddress = () => {
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => gooeyToast(t.installAddressCopied, { duration: 1800 }))
+      .catch(() => gooeyToast(window.location.href, { duration: 4000 }));
+  };
 
   return (
     <div
@@ -70,12 +78,29 @@ export default function InstallGuideModal({ variant, onClose }) {
               <span className="flex-1 text-sm leading-relaxed pt-0.5" style={{ color: theme.text }}>
                 {step.text}
               </span>
-              <span
-                className="w-9 h-9 rounded-lg border-2 flex items-center justify-center shrink-0"
-                style={{ backgroundColor: theme.accent, borderColor: theme.border }}
-              >
-                <Icon icon={step.icon} width={20} style={{ color: theme.text }} />
-              </span>
+              {/* Only the copy step is actionable; the rest are plain icons. */}
+              {step.copy ? (
+                <button
+                  type="button"
+                  onClick={copyAddress}
+                  aria-label={t.installCopyAddress}
+                  className="w-9 h-9 rounded-lg border-2 flex items-center justify-center shrink-0 active:scale-90 transition-transform touch-manipulation"
+                  style={{
+                    backgroundColor: theme.btnPrimary,
+                    borderColor: theme.border,
+                    boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
+                  }}
+                >
+                  <Icon icon={step.icon} width={20} style={{ color: '#1e293b' }} />
+                </button>
+              ) : (
+                <span
+                  className="w-9 h-9 rounded-lg border-2 flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: theme.accent, borderColor: theme.border }}
+                >
+                  <Icon icon={step.icon} width={20} style={{ color: theme.text }} />
+                </span>
+              )}
             </li>
           ))}
         </ol>

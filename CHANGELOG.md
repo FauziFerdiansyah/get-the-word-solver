@@ -4,6 +4,44 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.5.0 — 2026-08-23
+
+### Fixed
+
+- **Single-row mode threw away correct answers.** A green letter plus a yellow of
+  the same letter was read as "two copies". That only holds inside one guess; this
+  row merges several guesses, so finding T at position 5 and having learned T is
+  not at position 3 are two facts about the same T. With R/A yellow and T green,
+  HEART was missing entirely — now it is the answer.
+- **The install progress overlay could never appear.** Accepting the prompt clears
+  `promptEvent`, which unmounted the button component and the overlay with it.
+- Switching between 1 row and 6 rows no longer wipes what was typed; the two
+  models keep their own state. Changing word length still resets, as it must.
+- An empty result list now names any letter that is marked as present and crossed
+  out on the keyboard at the same time, instead of just saying "no match".
+- The declared OG image size did not match the file (1200×630 declared, 1254×1254
+  actual). There is now a real 1200×630 image.
+
+### Added
+
+- **Launch screen** using the supplied artwork, with the round icon centred. It
+  runs only when opened as an installed app.
+- **Install progress overlay** with a real percentage: it counts the app's files
+  as they are pulled into the offline cache. Installation itself exposes no
+  progress, so nothing here is a fake timer.
+- A copy button on the "copy this address" step of the iOS guide; the other steps
+  stay plain icons.
+- A green letter in a top box now clears that position's ruled-out box, since
+  nothing else can sit there.
+
+### Changed
+
+- Icons regenerated from the circular source on white, with the maskable one kept
+  inside Android's 80% safe zone so its edges are no longer shaved by the circle
+  mask. The Android splash background is white.
+- `public/` shrank from 3.7 MB to 560 kB by quantising the icons and replacing the
+  2 MB source art that was being deployed.
+
 ## 2.4.0 — 2026-08-23
 
 ### Added

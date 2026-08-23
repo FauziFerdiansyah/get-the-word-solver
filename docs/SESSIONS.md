@@ -5,6 +5,42 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.5.0
+
+Field report with two real logic bugs in it.
+
+- **The HEART bug.** Reproduced immediately: R/A yellow + T green returned 0
+  matches even though HEART satisfied every positional constraint. Cause was my
+  own rule, "green + yellow of one letter = two copies". True within a single
+  guess, false on a row that merges several guesses. Yellow now raises the
+  minimum to one and no further; two greens still count as two.
+- **Install progress could never show.** Accepting the prompt calls
+  `setPromptEvent(null)`, and the component's own guard `if (!promptEvent &&
+  !isIOS) return null` then unmounted it along with the overlay. Found by the
+  test, not by inspection.
+- Mode switching no longer calls `clearInputs`. The clue row and the board are
+  separate state, so each survives a round trip.
+- Empty results now name letters that are both crossed out and marked present.
+  That contradiction is the likeliest cause of the intermittent "no answers"
+  report, and it was invisible before.
+- Green letter clears its position's ruled-out box; note this does lose the "this
+  letter is somewhere" fact, which is why it only fires for green.
+
+Platform work:
+
+- A manifest cannot carry a splash image — Android builds its splash from `name`,
+  `background_color` and the icons, full stop. iOS can, but only through a matrix
+  of `apple-touch-startup-image` PNGs per exact device size: ~300 kB of JPEG for
+  four iPhones, and nothing for the rest. Painting the launch screen inside the
+  app instead costs two 10 kB SVGs and works on every platform.
+- The square-then-round icon the user saw is Android applying its circle mask to
+  the maskable icon. Their replacement had content at 90% of the canvas, outside
+  the 80% safe zone, so its edges were being shaved. Regenerated at 80%.
+- `public/` held 3.7 MB, all of it deployed: a 2 MB `word-large.png`, a 1.2 MB
+  `word-circle.png`, and 500 kB of unquantised icons. Now 560 kB.
+
+---
+
 ## 2026-08-23 — v2.4.0
 
 - **Delete sound.** The sprite gained a 27th slot from the pack's real Backspace

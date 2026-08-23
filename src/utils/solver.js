@@ -12,8 +12,9 @@
 //
 // Asking for two copies of a letter is deliberately not expressible here: use
 // the 6-row board, where a guess showing the same letter twice says it exactly.
-// The one exception is a letter that is green somewhere and yellow elsewhere,
-// which does mean two copies.
+// A green and a yellow of the same letter do NOT mean two copies on this row —
+// the row merges what several guesses revealed, so they are the same letter seen
+// twice.
 //
 // `disabledLetters` is a Set of uppercase letters known to be absent from the
 // target word anywhere (marked via the virtual keyboard).
@@ -35,9 +36,15 @@ const countOf = (word, letter) => {
 };
 
 export function findMatches(words, letters, excluded = [], disabledLetters = new Set()) {
-  // How many copies of each letter the answer must hold: the greens, plus one
-  // more for a letter that also shows up as a yellow. Listing the same yellow
-  // letter under several boxes still means one copy.
+  // How many copies of each letter the answer must hold. A green tells us
+  // exactly how many are placed; a yellow only tells us the letter is in there
+  // at all, so it raises the minimum to one and no further.
+  //
+  // It must NOT be "greens + 1". Within a single guess a green T alongside a
+  // yellow T does prove two T's, but this row merges what several guesses
+  // revealed: finding T at position 5 (green) and having learned T is not at
+  // position 3 (yellow) are two facts about the same T. Adding them threw away
+  // every correct answer — HEART disappeared from R/A yellow + T green.
   const greens = new Map();
   for (const letter of letters) {
     if (letter) greens.set(letter, (greens.get(letter) || 0) + 1);
@@ -50,7 +57,7 @@ export function findMatches(words, letters, excluded = [], disabledLetters = new
 
   const minLetterCount = new Map(greens);
   for (const letter of yellows) {
-    minLetterCount.set(letter, (greens.get(letter) || 0) + 1);
+    minLetterCount.set(letter, Math.max(greens.get(letter) || 0, 1));
   }
 
   const matches = words.filter((word) => {

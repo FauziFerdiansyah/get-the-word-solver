@@ -58,9 +58,18 @@ export const LANG = {
     clueDuplicateHint: 'Butuh dua huruf yang sama? Pakai mode 6 Baris.',
     clueToggle: 'Ubah warna huruf posisi',
     letterCrossedOut: 'sudah dicoret di keyboard, jadi tidak bisa jadi huruf kuning.',
+    conflictLetters: 'ditandai ada di kata sekaligus dicoret di keyboard. Batalkan coretannya, atau hapus huruf itu dari kotak clue.',
     letterAlreadyThere: 'sudah ada di kotak itu.',
     boxFull: '— kotak sudah penuh.',
     installApp: 'Install aplikasi',
+    installCopyAddress: 'Salin alamat halaman',
+    installAddressCopied: 'Alamat halaman disalin. Tempel di Safari.',
+    installPreparing: 'Menyiapkan aplikasi',
+    installPreparingNote: 'Menyimpan file aplikasi supaya tetap bisa dibuka tanpa internet.',
+    installReady: 'Aplikasi siap',
+    installReadyNote: 'Semua file sudah tersimpan. App bisa dibuka dari layar utama, termasuk saat offline.',
+    installFiles: 'file',
+    installSkipped: 'file gagal disimpan, app tetap bisa dipakai selama ada internet.',
     installGuide: {
       'ios-safari': {
         intro: 'iPhone dan iPad tidak punya tombol install otomatis, tapi app ini bisa ditaruh di layar utama lewat 3 langkah:',
@@ -74,7 +83,7 @@ export const LANG = {
       'ios-other': {
         intro: 'Di iPhone dan iPad, menaruh app di layar utama paling mudah lewat Safari. Buka halaman ini di Safari dulu:',
         steps: [
-          { icon: 'tabler:copy', text: 'Salin alamat halaman ini dari bar alamat browser.' },
+          { icon: 'tabler:copy', copy: true, text: 'Salin alamat halaman ini — tap tombol hijau di sebelah kanan.' },
           { icon: 'tabler:compass', text: 'Buka Safari, lalu tempel alamatnya di bar alamat.' },
           { icon: 'tabler:share-2', text: 'Tap ikon Bagikan di bar bawah Safari.' },
           { icon: 'tabler:square-rounded-plus', text: 'Pilih "Add to Home Screen", lalu tap "Add".' },
@@ -209,9 +218,18 @@ export const LANG = {
     clueDuplicateHint: 'Need the same letter twice? Use the 6 Rows mode.',
     clueToggle: 'Change colour of letter at position',
     letterCrossedOut: 'is crossed out on the keyboard, so it cannot be a yellow letter.',
+    conflictLetters: 'is marked as being in the word and crossed out on the keyboard at the same time. Un-cross it, or remove it from the clue boxes.',
     letterAlreadyThere: 'is already in that box.',
     boxFull: '— the box is full.',
     installApp: 'Install app',
+    installCopyAddress: 'Copy page address',
+    installAddressCopied: 'Page address copied. Paste it into Safari.',
+    installPreparing: 'Preparing the app',
+    installPreparingNote: 'Saving the app\'s files so it still opens without a connection.',
+    installReady: 'Ready to go',
+    installReadyNote: 'Every file is stored. The app opens from your home screen, offline included.',
+    installFiles: 'files',
+    installSkipped: 'files could not be stored; the app still works while you are online.',
     installGuide: {
       'ios-safari': {
         intro: 'iPhone and iPad have no automatic install button, but this app can go on your home screen in 3 steps:',
@@ -225,7 +243,7 @@ export const LANG = {
       'ios-other': {
         intro: 'On iPhone and iPad, the home screen shortcut is easiest from Safari. Open this page there first:',
         steps: [
-          { icon: 'tabler:copy', text: 'Copy this page\'s address from your browser\'s address bar.' },
+          { icon: 'tabler:copy', copy: true, text: 'Copy this page\'s address — tap the green button on the right.' },
           { icon: 'tabler:compass', text: 'Open Safari and paste the address in.' },
           { icon: 'tabler:share-2', text: 'Tap the Share icon in Safari\'s bottom bar.' },
           { icon: 'tabler:square-rounded-plus', text: 'Choose "Add to Home Screen", then tap "Add".' },

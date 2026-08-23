@@ -10,6 +10,7 @@ import BoardGrid from './components/BoardGrid';
 import ModeSelector from './components/ModeSelector';
 import ViewSwitcher from './components/ViewSwitcher';
 import InstallButton from './components/InstallButton';
+import LaunchScreen from './components/LaunchScreen';
 import Keyboard from './components/Keyboard';
 import ResultsList, { PAGE_SIZE } from './components/ResultsList';
 import ConfirmModal from './components/ConfirmModal';
@@ -85,6 +86,26 @@ export default function App() {
 
   const resultCount = results.common.length + results.rare.length;
 
+  // A letter cannot be absent and present at once. When that happens the result
+  // list is empty for a reason the user cannot see, so name the letters.
+  const conflicts = useMemo(() => {
+    const present = new Set();
+    if (mode === 'board') {
+      for (const row of board) {
+        row.letters.forEach((letter, i) => {
+          if (letter && row.states[i] !== 'gray') present.add(letter);
+        });
+      }
+    } else {
+      clues.forEach((letter, i) => {
+        if (letter && clueStates[i] !== 'yellow') present.add(letter);
+        else if (letter) present.add(letter);
+      });
+      for (const box of excluded) for (const letter of box || '') present.add(letter);
+    }
+    return [...present].filter((letter) => disabledLetters.has(letter));
+  }, [mode, board, clues, clueStates, excluded, disabledLetters]);
+
   const clearInputs = (length) => {
     setClues(emptyClues(length));
     setClueStates(emptyStates(length));
@@ -117,10 +138,23 @@ export default function App() {
 
   const cancelLevelChange = () => setPendingLength(null);
 
+  // Switching mode no longer wipes anything: the single-row clues and the board
+  // are separate pieces of state, so each is still there when you come back.
   const handleSelectMode = (nextMode) => {
     if (nextMode === mode) return;
     setMode(nextMode);
-    clearInputs(wordLength);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  // Once a position is settled by a green letter, nothing else can sit there, so
+  // that position's ruled-out box is cleared rather than left as dead clutter.
+  const clearExcludedAt = (index) => {
+    setExcluded((prev) => {
+      if (!prev[index]) return prev;
+      const next = [...prev];
+      next[index] = '';
+      return next;
+    });
   };
 
   const handleClueChange = (index, value) => {
@@ -135,16 +169,20 @@ export default function App() {
         next[index] = 'green';
         return next;
       });
+    } else if (clueStates[index] !== 'yellow') {
+      clearExcludedAt(index);
     }
     setVisibleCount(PAGE_SIZE);
   };
 
   const handleClueStateToggle = (index) => {
+    const nextState = clueStates[index] === 'yellow' ? 'green' : 'yellow';
     setClueStates((prev) => {
       const next = [...prev];
-      next[index] = prev[index] === 'yellow' ? 'green' : 'yellow';
+      next[index] = nextState;
       return next;
     });
+    if (nextState === 'green') clearExcludedAt(index);
     setVisibleCount(PAGE_SIZE);
   };
 
@@ -240,6 +278,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full transition-colors" style={{ backgroundColor: theme.bg }} onPointerDown={warmUp}>
+      <LaunchScreen />
       <GooeyToaster position="bottom-center" expand={true} visibleToasts={3} duration={1500} preset="snappy" />
 
       <main className="w-full max-w-5xl mx-auto px-3 py-4 sm:px-4 sm:py-6 lg:py-10">
@@ -367,6 +406,7 @@ export default function App() {
             hasSearched={hasFilledFields}
             showDefinition={showDefinition}
             category={category}
+            conflicts={conflicts}
             onCategoryChange={handleCategoryChange}
           />
         </div>

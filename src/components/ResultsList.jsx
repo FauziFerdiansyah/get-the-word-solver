@@ -97,6 +97,7 @@ export default function ResultsList({
   hasSearched,
   showDefinition,
   category,
+  conflicts = [],
   onCategoryChange,
 }) {
   const { theme, t, lang, showHints } = useTheme();
@@ -126,7 +127,11 @@ export default function ResultsList({
         }}
       >
         <Icon icon="tabler:mood-empty" width={22} style={{ color: theme.red }} className="shrink-0" />
-        <span>{t.noMatch}</span>
+        <span>
+          {conflicts.length > 0
+            ? `${conflicts.join(', ')} ${t.conflictLetters}`
+            : t.noMatch}
+        </span>
       </div>
     );
   }

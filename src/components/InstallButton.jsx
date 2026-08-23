@@ -2,21 +2,19 @@ import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { useTheme } from '../contexts/ThemeContext';
 import InstallGuideModal from './InstallGuideModal';
+import { isStandalone, isIOS as detectIOS, isIOSSafari as detectIOSSafari } from '../utils/platform';
+import InstallProgressModal from './InstallProgressModal';
 
 // Android/Chrome fires `beforeinstallprompt` when the app qualifies for
 // installation; holding on to that event lets us offer a real install button
 // instead of hoping the user finds the browser menu. iOS never fires it, so
 // there the button falls back to a short instruction.
-// Already running as an installed app? Then there is nothing to offer.
-const isStandalone = () =>
-  window.matchMedia?.('(display-mode: standalone)').matches === true ||
-  window.navigator.standalone === true;
-
 export default function InstallButton() {
   const { theme, t } = useTheme();
   const [promptEvent, setPromptEvent] = useState(null);
   const [installed, setInstalled] = useState(isStandalone);
   const [showGuide, setShowGuide] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
 
   useEffect(() => {
     const onPrompt = (e) => {
@@ -36,24 +34,26 @@ export default function InstallButton() {
     };
   }, []);
 
-  const ua = navigator.userAgent || '';
-  // iPadOS 13+ reports itself as a Mac, so touch support is the giveaway.
-  const isIOS =
-    /iPad|iPhone|iPod/.test(ua) ||
-    (/Macintosh/.test(ua) && typeof document !== 'undefined' && navigator.maxTouchPoints > 1);
-  // Every iOS browser is WebKit; only the real Safari UA lacks these markers.
-  const isIOSSafari = isIOS && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  const isIOS = detectIOS();
+  const isIOSSafari = detectIOSSafari();
 
-  if (installed) return null;
+  // Both guards have to let the progress overlay through: accepting the prompt
+  // clears promptEvent, which used to unmount this component — and the overlay
+  // with it — the instant the install was approved.
+  if (installed && !showProgress) return null;
   // Nothing to offer on a desktop browser that never signalled installability.
-  if (!promptEvent && !isIOS) return null;
+  if (!promptEvent && !isIOS && !showProgress) return null;
 
   const handleClick = async () => {
     if (promptEvent) {
       promptEvent.prompt();
       const { outcome } = await promptEvent.userChoice;
-      if (outcome === 'accepted') setInstalled(true);
       setPromptEvent(null);
+      if (outcome === 'accepted') {
+        // The OS gives no progress for the install itself, so this shows the one
+        // thing that does have a measurable size: filling the offline cache.
+        setShowProgress(true);
+      }
       return;
     }
     setShowGuide(true);
@@ -75,6 +75,15 @@ export default function InstallButton() {
         <Icon icon="tabler:device-mobile-down" width={18} />
         {t.installApp}
       </button>
+
+      {showProgress && (
+        <InstallProgressModal
+          onClose={() => {
+            setShowProgress(false);
+            setInstalled(true);
+          }}
+        />
+      )}
 
       {showGuide && (
         <InstallGuideModal
