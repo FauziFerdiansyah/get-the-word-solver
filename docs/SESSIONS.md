@@ -5,6 +5,27 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.7.0
+
+- **Saved sessions** in `src/utils/sessions.js` plus a `SessionManager` inside the
+  settings sheet. Storage is `localStorage`: cookies would be sent with every
+  request for no reason on a static site and cap out near 4 kB. Sets are stored as
+  arrays because JSON has none, and `isValidSession` checks every array against
+  the word length it claims — a saved session is user data that an older build may
+  have written, so it is validated rather than trusted. Capped at 12.
+  `snapshot()` is called at save time, not on render, so the list can never hold a
+  stale board.
+- README's structure section had drifted badly: it listed 11 components when there
+  are 16, and none of the utils, docs or generated assets. Rewritten from the real
+  tree. Demo URL updated to the custom domain.
+- `public/word-circle.png` (116 kB) and `public/type.wav` (55 kB) were dead weight
+  being deployed — the icons are square now and the key sounds are samples. Moved
+  to `design/`, which is not served.
+- Renamed `App.install3.test.jsx` to `App.regressions.test.jsx`; the number told
+  nobody anything.
+
+---
+
 ## 2026-08-23 — v2.6.0
 
 - **Square icons.** Regenerated everything from `word-large.png` rather than

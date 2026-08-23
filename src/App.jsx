@@ -275,6 +275,37 @@ export default function App() {
 
   const handleShowMore = () => setVisibleCount((prev) => prev + PAGE_SIZE);
 
+  // Taken at save time, not on render, so a saved session is never a stale copy.
+  // Sets are stored as arrays because JSON has no Set.
+  const snapshotSession = () => ({
+    wordLength,
+    mode,
+    clues,
+    clueStates,
+    excluded,
+    board,
+    disabled: {
+      single: [...disabledByMode.single],
+      board: [...disabledByMode.board],
+    },
+  });
+
+  const restoreSession = (state) => {
+    setWordLength(state.wordLength);
+    setMode(state.mode);
+    setClues(state.clues);
+    setClueStates(state.clueStates);
+    setExcluded(state.excluded);
+    setBoard(state.board);
+    setDisabledByMode({
+      single: new Set(state.disabled.single),
+      board: new Set(state.disabled.board),
+    });
+    setVisibleCount(PAGE_SIZE);
+    setCategory('all');
+    setShowSettings(false);
+  };
+
   // Reset the page when switching tiers: carrying a large visibleCount over to a
   // tier with few matches collapsed the list and shifted the page under you.
   const handleCategoryChange = (next) => {
@@ -410,9 +441,10 @@ export default function App() {
               type="button"
               onClick={handleReset}
               disabled={!hasFilledFields}
-              className="flex-1 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] disabled:opacity-50 touch-manipulation"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] disabled:opacity-50 touch-manipulation"
               style={{ backgroundColor: theme.btnSecondary, borderColor: theme.border, color: '#1e293b', boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
             >
+              <Icon icon="tabler:eraser" width={18} />
               {t.reset}
             </button>
             <button
@@ -464,7 +496,12 @@ export default function App() {
         onCancel={() => setPendingReset(false)}
       />
 
-      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsModal
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        snapshot={snapshotSession}
+        onRestoreSession={restoreSession}
+      />
       <CoachMark open={showCoach} onClose={() => setShowCoach(false)} />
       {showRandom && (
         <RandomWordModal

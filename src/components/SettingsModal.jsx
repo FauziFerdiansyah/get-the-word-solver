@@ -1,12 +1,13 @@
 import { Icon } from '@iconify/react';
 import { useTheme } from '../contexts/ThemeContext';
 import { playTestSound, getAudioState } from '../utils/sound';
+import SessionManager from './SessionManager';
 import { THEMES } from '../data/themes';
 import { gooeyToast } from 'goey-toast';
 
 const themeKeys = Object.keys(THEMES);
 
-export default function SettingsModal({ open, onClose }) {
+export default function SettingsModal({ open, onClose, snapshot, onRestoreSession }) {
   const {
     theme, themeName, setThemeName, darkMode, setDarkMode,
     soundEnabled, setSoundEnabled, showDefinition, setShowDefinition,
@@ -199,6 +200,11 @@ export default function SettingsModal({ open, onClose }) {
           </button>
           </div>
         </div>
+
+        {/* Saved sessions */}
+        {snapshot && onRestoreSession && (
+          <SessionManager snapshot={snapshot} onRestore={onRestoreSession} />
+        )}
 
         {/* High Contrast */}
         <div className="flex items-start justify-between gap-3 py-3 border-b" style={{ borderColor: theme.border + '40' }}>

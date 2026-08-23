@@ -25,7 +25,8 @@ A lightweight, mobile-first web app to help you solve **Wordle** and **Get the W
 - **Mechanical key sounds** — a real Cherry MX Blue recording per letter, 62 kB for all 26, with a synthesised fallback and a "Test" button in Settings
 - **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
 - **Hideable hints** — switch the explanations off once you know the app
-- **Random word** — drawn from the top-ranked words only, never the obscure tail
+- **Random word** — drawn from the words currently matching your clues, common tier first
+- **Saved sessions** — keep a puzzle you are working on and reopen it later, stored on your device
 - **Coach mark tutorial** — step-by-step guide for first-time users
 - **Mobile-first responsive** — fluid tiles that fit a 320px phone at every word length, 10-column keyboard grid, 44px tap targets, and 16px inputs so iOS never zooms on focus; desktop shows a 50/50 split
 - **Installable (PWA)** — one-tap install where the browser supports it, plus an illustrated step-by-step guide on iOS; correctly sized 192/512/maskable icons and a top bar that matches the theme
@@ -37,7 +38,7 @@ A lightweight, mobile-first web app to help you solve **Wordle** and **Get the W
 
 ## 🖥️ Demo
 
-Live: [https://fauziferdiansyah.github.io/get-the-word-solver/](https://fauziferdiansyah.github.io/get-the-word-solver/)
+Live: [https://fauzi.is-a.dev/get-the-word-solver/](https://fauzi.is-a.dev/get-the-word-solver/)
 
 ---
 
@@ -119,48 +120,78 @@ All themes support Dark Mode (except Buta Warna which stays consistent for acces
 
 ```
 get-the-word-solver/
-├── public/
-│   ├── word.png          # App logo & favicon
-│   ├── keys.mp3          # Generated: 26 key samples, 300ms slots
-│   ├── error.wav         # Error sound effect
-│   └── bell.wav          # Success bell sound
+├── public/                       # served as-is
+│   ├── manifest.json             # PWA manifest
+│   ├── sw.js                     # service worker (network-first + cache)
+│   ├── icon-192.png              # generated icons: any purpose
+│   ├── icon-512.png
+│   ├── icon-maskable-512.png     # content inside Android's centre-80% safe zone
+│   ├── apple-touch-icon.png      # 180px, iOS home screen
+│   ├── og-image.png              # 1200×630 social preview
+│   ├── screen-light.svg          # launch screen backgrounds
+│   ├── screen-dark.svg
+│   ├── keys.mp3                  # generated: 27 key samples in 300ms slots
+│   ├── error.wav                 # error and success cues
+│   ├── bell.wav
+│   ├── word.png                  # favicon
+│   ├── word-large.png            # square logo, source for the icons
+│   ├── favicon.ico / favicon.svg / icons.svg
+│   └── id.png / en.png           # language flags
+├── design/                       # source art, not deployed
+│   ├── word-circle.png
+│   └── type.wav
 ├── src/
-│   ├── components/       # React UI components
-│   │   ├── ClueGrid.jsx      # single-row clue input
-│   │   ├── BoardGrid.jsx     # 6-row game board input
-│   │   ├── ModeSelector.jsx  # 1 row / 6 rows switch
-│   │   ├── ViewSwitcher.jsx  # phone-only clues / answers toggle
-│   │   ├── InstallButton.jsx # PWA install prompt
-│   │   ├── Keyboard.jsx
-│   │   ├── LevelSelector.jsx
-│   │   ├── ResultsList.jsx
-│   │   ├── ConfirmModal.jsx
-│   │   ├── SettingsModal.jsx
-│   │   └── CoachMark.jsx
+│   ├── App.jsx                   # owns every piece of state
+│   ├── main.jsx                  # entry point, service worker registration
+│   ├── index.css                 # Tailwind entry, theme overrides, keyframes
+│   ├── components/
+│   │   ├── LevelSelector.jsx     # 4 / 5 / 6 letters
+│   │   ├── ModeSelector.jsx      # 1 row / 6 rows
+│   │   ├── ViewSwitcher.jsx      # phone-only clues / answers tabs
+│   │   ├── ClueGrid.jsx          # single-row input: green box + ruled-out box
+│   │   ├── BoardGrid.jsx         # 6-row board, one guess per row
+│   │   ├── Keyboard.jsx          # 20-column grid, letter crossing-out
+│   │   ├── ResultsList.jsx       # ranked suggestions, tier tabs, copy
+│   │   ├── SettingsModal.jsx     # themes, language, sound, toggles, sessions
+│   │   ├── SessionManager.jsx    # save / open / delete saved sessions
+│   │   ├── CoachMark.jsx         # 8-step walkthrough
+│   │   ├── RandomWordModal.jsx   # dice, drawn from the current answers
+│   │   ├── ConfirmModal.jsx      # reset / level-change confirmation
+│   │   ├── LaunchScreen.jsx      # in-app splash for the installed app
+│   │   ├── InstallButton.jsx     # one-tap install where supported
+│   │   ├── InstallGuideModal.jsx # step-by-step guide for iOS and desktop
+│   │   └── InstallProgressModal.jsx  # offline precache progress
 │   ├── contexts/
-│   │   └── ThemeContext.jsx
+│   │   └── ThemeContext.jsx      # theme, dark mode, contrast, every setting
 │   ├── data/
-│   │   ├── words.js      # Generated, rank-ordered word dictionary
-│   │   └── themes.js     # Theme color definitions
+│   │   ├── words.js              # GENERATED, rank-ordered word lists
+│   │   ├── themes.js             # 6 colour themes
+│   │   └── i18n.js               # id / en strings
 │   ├── utils/
-│   │   ├── solver.js     # Word matching + ranking logic
-│   │   ├── solver.test.js
-│   │   ├── sound.js      # Per-key sound synthesis
-│   │   └── sound.test.js
-│   ├── App.board.test.jsx    # 6-row board behaviour
-│   ├── App.clue.test.jsx     # single row, keyboard, random word
-│   ├── App.jsx           # Main app component
-│   ├── main.jsx          # Entry point
-│   └── index.css         # Global styles & Tailwind
+│   │   ├── solver.js             # findMatches (1 row), findMatchesFromBoard (6)
+│   │   ├── sound.js              # sample playback + synth fallback
+│   │   ├── sessions.js           # saved sessions in localStorage
+│   │   ├── platform.js           # standalone / iOS detection
+│   │   ├── dictionary.js         # Free Dictionary API + cache
+│   │   └── translator.js
+│   ├── *.test.js / *.test.jsx    # 159 tests: solver, sound, and one file per
+│   │                             # UI area (clue, board, view, settings,
+│   │                             # sessions, coach, sound, install, pwa,
+│   │                             # regressions)
+│   ├── test-setup.js             # jsdom shims, cleanup
+│   └── test-audio-mock.js        # Web Audio stand-in shared by tests
 ├── scripts/
-│   ├── build-words.mjs   # Regenerates src/data/words.js
-│   └── build-key-sounds.mjs  # Regenerates public/keys.mp3
-├── .github/workflows/
-│   └── deploy.yml        # GitHub Actions auto-deploy
+│   ├── build-words.mjs           # regenerates src/data/words.js
+│   └── build-key-sounds.mjs      # regenerates public/keys.mp3
+├── docs/
+│   ├── SRS.md / REQUIREMENTS.md / DESIGN.md / SKILLS.md / SESSIONS.md
+├── .github/workflows/deploy.yml  # builds and deploys to GitHub Pages
+├── AGENTS.md                     # rules for AI agents, versioning policy
+├── CHANGELOG.md
 ├── index.html
-├── vite.config.js
-├── package.json
-└── README.md
+├── vite.config.js                # build config, __APP_VERSION__ define
+├── vitest.config.js              # jsdom environment for tests
+└── package.json
 ```
 
 ---

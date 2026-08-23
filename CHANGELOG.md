@@ -4,6 +4,26 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.7.0 — 2026-08-23
+
+### Added
+
+- **Saved sessions.** Keep the puzzle you are working on under a name and reopen
+  it later, from Settings. A session stores the word length, the mode, both input
+  models and each mode's crossed-out letters, so opening one puts you exactly
+  where you left off. Kept in `localStorage` (not cookies: those ride along with
+  every request and cap out near 4 kB), up to 12 sessions, and validated on the
+  way in so an older or corrupt entry cannot break the app.
+- An icon on the Reset button.
+
+### Changed
+
+- README: the project structure now matches the tree, and the demo link points at
+  https://fauzi.is-a.dev/get-the-word-solver/.
+- `word-circle.png` and the old `type.wav` moved from `public/` to `design/`: both
+  are unused since the icons went square and the key sounds became samples, and
+  everything in `public/` is deployed.
+
 ## 2.6.0 — 2026-08-23
 
 ### Changed
