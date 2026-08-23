@@ -26,6 +26,7 @@ A lightweight, mobile-first web app to help you find answers for **Get The Word!
 - **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
 - **Hideable hints** — switch the explanations off once you know the app
 - **In-app version history** — every release note, read straight from CHANGELOG.md
+- **In-app version history** — every release note, read straight from CHANGELOG.md
 - **Random word** — drawn from the words currently matching your clues, common tier first
 - **Saved sessions** — keep a puzzle you are working on and reopen it later, with a preview and the exact time it was saved; stored on your device
 - **Coach mark tutorial** — step-by-step guide for first-time users
@@ -168,7 +169,8 @@ get-the-word-solver/
 │   ├── data/
 │   │   ├── words.js              # GENERATED, rank-ordered word lists
 │   │   ├── themes.js             # 6 colour themes
-│   │   └── i18n.js               # id / en strings
+│   │   ├── i18n.js               # id / en strings
+│   │   └── changelog.js          # parses CHANGELOG.md for the in-app history
 │   ├── utils/
 │   │   ├── solver.js             # findMatches (1 row), findMatchesFromBoard (6)
 │   │   ├── sound.js              # sample playback + synth fallback

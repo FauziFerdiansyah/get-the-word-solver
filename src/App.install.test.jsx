@@ -84,6 +84,19 @@ describe('PWA manifest', () => {
   });
 });
 
+describe('README', () => {
+  it('names every source file, so the structure section cannot drift', () => {
+    const readme = readFileSync('README.md', 'utf8');
+    const walk = (dir) => execSync(`find ${dir} -type f -name '*.js*'`).toString().trim().split('\n');
+    const sources = [...walk('src/components'), ...walk('src/utils'), ...walk('src/data'), ...walk('src/contexts')]
+      .map((path) => path.split('/').pop())
+      .filter((name) => !name.includes('.test.'));
+
+    const missing = sources.filter((name) => !readme.includes(name));
+    expect(missing, `not listed in README: ${missing.join(', ')}`).toEqual([]);
+  });
+});
+
 describe('version', () => {
   const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 

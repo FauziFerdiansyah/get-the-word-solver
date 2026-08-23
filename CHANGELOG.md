@@ -4,6 +4,14 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.9.1 — 2026-08-23
+
+### Fixed
+
+- `src/data/changelog.js` was missing from the README's structure section. A test
+  now lists every source file under `src/` and fails if the README does not name
+  it, so that section cannot drift again.
+
 ## 2.9.0 — 2026-08-23
 
 ### Added

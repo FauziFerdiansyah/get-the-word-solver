@@ -5,6 +5,16 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.9.1
+
+The README edit for v2.9.0 never ran: it sat behind a `&&` chain whose earlier
+`grep` found nothing and returned non-zero, so the commit went out without it.
+Fixed, and replaced the one-off check I had run by hand with a test that walks
+`src/` and fails when the README does not name a source file. A convention only
+holds if something enforces it.
+
+---
+
 ## 2026-08-23 — v2.9.0
 
 - **In-app changelog.** `src/data/changelog.js` imports `CHANGELOG.md` with Vite's

@@ -1,5 +1,5 @@
 // Service Worker for PWA
-const CACHE_NAME = 'wordle-solver-v2.9.0';
+const CACHE_NAME = 'wordle-solver-v2.9.1';
 const urlsToCache = [
   './',
   './index.html',
