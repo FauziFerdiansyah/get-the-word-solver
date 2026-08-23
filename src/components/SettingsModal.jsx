@@ -1,8 +1,9 @@
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { playTestSound, getAudioState } from '../utils/sound';
+import { playTestSound, getAudioReport } from '../utils/sound';
 import SessionManager from './SessionManager';
+import { isIOS } from '../utils/platform';
 import ChangelogModal from './ChangelogModal';
 import { THEMES } from '../data/themes';
 import { gooeyToast } from 'goey-toast';
@@ -48,10 +49,16 @@ export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
   const handleTestSound = () => {
     playTestSound();
     setTimeout(() => {
-      const state = getAudioState();
-      if (state === 'running') gooeyToast.success(t.soundWorking, { duration: 3000 });
-      else gooeyToast.error(`${t.soundBlocked} (${state})`, { duration: 4000 });
-    }, 300);
+      const { state, samples } = getAudioReport();
+      if (state !== 'running') {
+        gooeyToast.error(`${t.soundBlocked} (${state})`, { duration: 5000 });
+        return;
+      }
+      gooeyToast.success(`${t.soundWorking} (${samples})`, { duration: 3000 });
+      // Safari mutes Web Audio with the ringer switch, so a running engine can
+      // still be inaudible on an iPhone and only the user can check that.
+      if (isIOS()) gooeyToast.info(t.soundIOSHint, { duration: 6000 });
+    }, 400);
   };
 
   const handleContrastToggle = () => {

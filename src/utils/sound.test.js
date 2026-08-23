@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { createMockAudioContext, emptyAudioLog } from '../test-audio-mock';
 
 let log;
@@ -148,6 +149,54 @@ describe('key sound engine', () => {
     expect(getAudioState()).toBe('idle');
     playKeySound('A');
     expect(getAudioState()).toBe('running');
+  });
+
+  it('keeps trying to unlock until the context actually starts', async () => {
+    // The iOS failure: Safari does not treat every event as an unlock trigger, so
+    // a one-shot attempt on the first pointerdown could miss and never retry —
+    // which is why sound worked on Android and never started on iPhone.
+    vi.resetModules();
+    log = emptyAudioLog();
+    const Base = createMockAudioContext(log);
+    let allowResume = false;
+    window.AudioContext = class extends Base {
+      constructor() {
+        super();
+        this.state = 'suspended';
+      }
+      resume() {
+        if (allowResume) this.state = 'running';
+        return Promise.resolve();
+      }
+    };
+    const { installAudioUnlock, getAudioReport } = await import('./sound');
+    const remove = installAudioUnlock(document);
+
+    // Two gestures while the browser still refuses.
+    document.dispatchEvent(new Event('pointerdown'));
+    document.dispatchEvent(new Event('touchend'));
+    await Promise.resolve();
+    expect(getAudioReport().state).toBe('suspended');
+    expect(getAudioReport().unlockAttempts).toBeGreaterThanOrEqual(2);
+
+    // The gesture Safari does honour finally lands.
+    allowResume = true;
+    document.dispatchEvent(new Event('click'));
+    await Promise.resolve();
+    expect(getAudioReport().state).toBe('running');
+
+    // Once running it stops listening.
+    const attemptsWhenRunning = getAudioReport().unlockAttempts;
+    document.dispatchEvent(new Event('click'));
+    expect(getAudioReport().unlockAttempts).toBe(attemptsWhenRunning);
+    remove();
+  });
+
+  it('listens on the events Safari honours, not just pointerdown', async () => {
+    const source = readFileSync('src/utils/sound.js', 'utf8');
+    for (const event of ['pointerdown', 'touchend', 'click', 'keydown']) {
+      expect(source).toContain(`'${event}'`);
+    }
   });
 
   it('never schedules a sound in the past', async () => {

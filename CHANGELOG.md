@@ -4,6 +4,19 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.11.1 — 2026-08-23
+
+### Fixed
+
+- **No sound on iPhone while Android was fine.** Unlocking the audio engine was a
+  one-shot attempt on the first `pointerdown`, and Safari does not accept every
+  event as an unlock trigger — when that single attempt missed, nothing ever tried
+  again. The unlock now runs on `pointerdown`, `touchend`, `click` and `keydown`,
+  and keeps listening until the engine really starts.
+- The sound Test button now reports whether it is playing recorded samples or the
+  fallback synth, and on iPhone adds a reminder that Safari follows the ringer
+  switch — a running engine can still be silent from the hardware mute.
+
 ## 2.11.0 — 2026-08-23
 
 ### Changed

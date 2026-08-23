@@ -5,6 +5,39 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.11.1
+
+**iOS had no sound while Android did.** The bug was the unlock being one-shot:
+
+```js
+let loaded = false;
+export async function warmUp() {
+  if (loaded) return;   // ← set on the first pointerdown, forever
+  ...
+  silent.start(0);      // ← the actual unlock, inside that guard
+}
+```
+
+`warmUp` was wired to a single `onPointerDown` on the root div. Android accepts
+`pointerdown` as a gesture that may start audio, so the first tap unlocked it and
+everything worked. Safari does not reliably accept `pointerdown`; its attempt
+missed, `loaded` was already true, and no later tap could try again.
+
+Split into `warmUp` (load buffers once) and `unlock` (retry every gesture until
+`state === 'running'`), with `installAudioUnlock` attaching document listeners for
+`pointerdown`, `touchend`, `click` and `keydown` in the capture phase and removing
+them once running. Test drives a mock that refuses `resume()` twice before
+accepting, which fails against the old one-shot code.
+
+Worth remembering: any "unlock on first gesture" flag that is set before knowing
+the unlock succeeded has this shape of bug.
+
+The remaining iOS cause is outside our reach — Safari mutes Web Audio with the
+ringer switch — so the Test button now says so on iOS instead of leaving the user
+guessing, and reports whether samples or the synth are in play.
+
+---
+
 ## 2026-08-23 — v2.11.0
 
 - **Settings popups leaked between openings.** `SettingsModal` returned `null`

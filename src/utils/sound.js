@@ -82,6 +82,19 @@ export function getAudioState() {
   return audioCtx ? audioCtx.state : 'idle';
 }
 
+// Everything the engine knows about itself. When a device is silent this says
+// whether the browser refused to start audio, the samples failed to load, or the
+// engine is running fine and the silence is outside our reach — which on iPhone
+// usually means the ringer switch, since Safari mutes Web Audio with it.
+export function getAudioReport() {
+  return {
+    state: getAudioState(),
+    samples: keySprite ? 'loaded' : 'synth',
+    unlockAttempts,
+    sampleRate: audioCtx?.sampleRate ?? 0,
+  };
+}
+
 // A hair in the future: scheduling exactly at currentTime is routinely dropped.
 const startTime = (ctx) => ctx.currentTime + 0.005;
 
@@ -102,12 +115,13 @@ async function loadBuffer(ctx, url) {
 
 // Called on the first user gesture: unlocks the context and pre-builds
 // everything so the first keypress is not delayed.
-let loaded = false;
+let buffersLoaded = false;
 export async function warmUp() {
-  if (loaded) return;
   const ctx = getCtx();
   if (!ctx) return;
-  loaded = true;
+  unlock();
+  if (buffersLoaded) return;
+  buffersLoaded = true;
   getNoise(ctx);
   // The sprite is fetched on the first gesture rather than at page load, so a
   // muted visitor never pays for it. That means the very first press of a
@@ -115,16 +129,6 @@ export async function warmUp() {
   loadBuffer(ctx, KEY_SPRITE)
     .then((buffer) => { keySprite = buffer; })
     .catch(() => { keySprite = null; });
-  // Safari keeps a context asleep until something has actually been played, so
-  // push one silent sample through it while we still hold the user gesture.
-  try {
-    const silent = ctx.createBufferSource();
-    silent.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
-    silent.connect(ctx.destination);
-    silent.start(0);
-  } catch {
-    // Not fatal — the synthesised sounds are scheduled independently.
-  }
   try {
     const [e, b] = await Promise.all([
       loadBuffer(ctx, ERROR_SOUND),
@@ -135,6 +139,50 @@ export async function warmUp() {
   } catch {
     // Silently fail — the synthesised key sounds still work.
   }
+}
+
+// iOS keeps a context asleep until something has actually been played through it,
+// so a silent sample is pushed while a gesture is still being handled.
+//
+// This has to be able to run more than once. An earlier version unlocked inside
+// `warmUp`, behind a `loaded` flag set on the very first `pointerdown` — so if
+// that one attempt did not take, nothing ever tried again. Safari does not treat
+// `pointerdown` as a reliable unlock trigger, which is exactly why sound worked
+// on Android and never started on iPhone.
+let unlockAttempts = 0;
+function unlock() {
+  const ctx = getCtx();
+  if (!ctx || ctx.state === 'running') return;
+  unlockAttempts += 1;
+  try {
+    const silent = ctx.createBufferSource();
+    silent.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+    silent.connect(ctx.destination);
+    silent.start(0);
+  } catch {
+    // Not fatal — playback is scheduled independently.
+  }
+  ensureRunning(ctx);
+}
+
+// Attached once at startup. `touchend` and `click` are the events Safari honours;
+// `pointerdown` alone is not enough. The listeners stay until the context is
+// actually running, so every tap gets another chance.
+export function installAudioUnlock(target = typeof document === 'undefined' ? null : document) {
+  if (!target) return () => {};
+  const events = ['pointerdown', 'touchend', 'click', 'keydown'];
+
+  const attempt = () => {
+    warmUp();
+    const ctx = audioCtx;
+    if (ctx && ctx.state === 'running') remove();
+  };
+  const remove = () => {
+    for (const type of events) target.removeEventListener(type, attempt, true);
+  };
+
+  for (const type of events) target.addEventListener(type, attempt, true);
+  return remove;
 }
 
 // Per-letter voices, spread across the keyboard so neighbouring letters differ

@@ -3,7 +3,6 @@ import { Icon } from '@iconify/react';
 import { GooeyToaster } from 'goey-toast';
 import 'goey-toast/styles.css';
 import { useTheme } from './contexts/ThemeContext';
-import { warmUp } from './utils/sound';
 import LevelSelector from './components/LevelSelector';
 import ClueGrid, { MAX_EXCLUDED } from './components/ClueGrid';
 import BoardGrid from './components/BoardGrid';
@@ -345,7 +344,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full transition-colors" style={{ backgroundColor: theme.bg }} onPointerDown={warmUp}>
+    <div className="min-h-screen w-full transition-colors" style={{ backgroundColor: theme.bg }}>
       <LaunchScreen />
       <GooeyToaster position="bottom-center" expand={true} visibleToasts={3} duration={2500} preset="snappy" />
 
