@@ -253,7 +253,7 @@ describe('install progress', () => {
     await waitFor(() => expect(bar.getAttribute('aria-valuenow')).toBe('100'));
     expect(within(dialog).getByText(/Aplikasi siap/)).toBeTruthy();
     // The closing button reports the outcome rather than saying "Mengerti".
-    expect(within(dialog).getByRole('button', { name: 'Terinstall' })).toBeTruthy();
+    expect(within(dialog).getByRole('button', { name: 'Berhasil Diinstall' })).toBeTruthy();
   });
 
   it('does not appear when the user dismisses the prompt', async () => {

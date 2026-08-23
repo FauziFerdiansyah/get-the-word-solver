@@ -28,8 +28,9 @@ function WordItem({ word, order, showDefinition, lang, tier }) {
     return () => { cancelled = true; };
   }, [word, showDefinition, lang]);
 
-  // Copying a single word gives its feedback on the button itself. A toast for
-  // every tap was noise on top of an action the user just performed.
+  // The button's icon turns into a tick and a toast names the word. What is gone
+  // is the `title` attribute: the browser rendered it as a native tooltip after a
+  // tap, which looked like a second, unstyled alert saying "Tersalin".
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (!copied) return undefined;
@@ -40,7 +41,10 @@ function WordItem({ word, order, showDefinition, lang, tier }) {
   const handleCopy = () => {
     navigator.clipboard
       .writeText(word)
-      .then(() => setCopied(true))
+      .then(() => {
+        setCopied(true);
+        gooeyToast.success(`${t.copiedWord} "${word}"`, { duration: 2500 });
+      })
       .catch(() => gooeyToast.error(t.copyFailed, { duration: 3000 }));
   };
 
@@ -82,7 +86,6 @@ function WordItem({ word, order, showDefinition, lang, tier }) {
             boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
           }}
           aria-label={copied ? t.copiedInline : `${t.copyWord} ${word}`}
-          title={copied ? t.copiedInline : undefined}
         >
           <Icon
             icon={copied ? 'tabler:check' : 'tabler:copy'}

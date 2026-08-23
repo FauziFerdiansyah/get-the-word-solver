@@ -150,6 +150,11 @@ export async function warmUp() {
 // `pointerdown` as a reliable unlock trigger, which is exactly why sound worked
 // on Android and never started on iPhone.
 let unlockAttempts = 0;
+export function unlockAudio() {
+  warmUp();
+  unlock();
+}
+
 function unlock() {
   const ctx = getCtx();
   if (!ctx || ctx.state === 'running') return;

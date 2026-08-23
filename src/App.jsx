@@ -10,6 +10,7 @@ import ModeSelector from './components/ModeSelector';
 import ViewSwitcher from './components/ViewSwitcher';
 import InstallButton from './components/InstallButton';
 import LaunchScreen from './components/LaunchScreen';
+import UpdateBanner from './components/UpdateBanner';
 import Keyboard from './components/Keyboard';
 import ResultsList, { PAGE_SIZE } from './components/ResultsList';
 import ConfirmModal from './components/ConfirmModal';
@@ -351,6 +352,8 @@ export default function App() {
       <main className="w-full max-w-5xl mx-auto px-3 py-4 sm:px-4 sm:py-6 lg:py-10">
         {/* Header keeps the icons in the flow so a long subtitle can never
             slide underneath them on a narrow screen. */}
+        <div className="mb-3 empty:mb-0"><UpdateBanner /></div>
+
         <header className="flex items-center gap-3 mb-3 sm:mb-4">
           <img src="./word.png" alt="" className="w-10 h-10 rounded-lg shrink-0" />
           <div className="min-w-0">

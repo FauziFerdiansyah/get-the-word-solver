@@ -125,13 +125,15 @@ describe('renamed settings labels', () => {
     expect(screen.getByText(/Cherry MX Blue/)).toBeTruthy();
   });
 
-  it('gives the sound test button an icon', async () => {
+  it('gives the sound button an icon', async () => {
     const user = renderApp();
     await user.click(screen.getByLabelText('Settings'));
 
-    const test = screen.getByRole('button', { name: /Tes/ });
-    expect(test.firstElementChild).toBeTruthy();
-    expect(test.firstElementChild.textContent).toBe('');
+    // jsdom has no AudioContext, so the row offers "Aktifkan Suara" — the gesture
+    // button shown whenever the browser has not started audio — instead of "Tes".
+    const button = screen.getByRole('button', { name: /Tes|Aktifkan Suara/ });
+    expect(button.firstElementChild).toBeTruthy();
+    expect(button.firstElementChild.textContent).toBe('');
   });
 
   it('turns a toggle into a readable on/off message', async () => {

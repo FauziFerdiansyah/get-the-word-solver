@@ -4,6 +4,33 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.12.0 — 2026-08-23
+
+### Added
+
+- **Update notice.** An installed copy now says when a new build is ready and can
+  reload straight into it, clearing the old caches first. This is how a home
+  screen app gets a new version — there is no store and no update API, so the
+  service worker changing on release is the only signal available. It matters most
+  on iPhone, where an installed app is often left open for days.
+- **"Aktifkan Suara"** appears in Settings while the browser has not started audio.
+  There is no permission to request for sound; a browser only starts it from a
+  gesture, so the button's own click is that gesture.
+
+### Changed
+
+- Copying a suggestion shows a toast again, naming the word: *Disalin kata "AFTER"*.
+- The Test button's message uses a toast description: the title says the sound is
+  working, and the ringer-switch caveat sits underneath it — shown on iPhone only,
+  where it applies.
+- The install progress closes with "Berhasil Diinstall".
+
+### Fixed
+
+- A second, unstyled "Tersalin" popup appeared after copying on Android. It was the
+  browser drawing the button's `title` attribute as a native tooltip; the attribute
+  is gone and the accessible label carries that text instead.
+
 ## 2.11.1 — 2026-08-23
 
 ### Fixed

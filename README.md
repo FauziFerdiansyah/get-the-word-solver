@@ -26,7 +26,9 @@ A lightweight, mobile-first web app to help you find answers for **Get The Word!
 - **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
 - **Hideable hints** — switch the explanations off once you know the app
 - **In-app version history** — every release note, read straight from CHANGELOG.md
+- **Update notice** — an installed copy is told when a new build is ready and can reload into it
 - **In-app version history** — every release note, read straight from CHANGELOG.md
+- **Update notice** — an installed copy is told when a new build is ready and can reload into it
 - **Random word** — drawn from the words currently matching your clues, common tier first
 - **Saved sessions** — keep a puzzle you are working on and reopen it later, with a preview and the exact time it was saved; stored on your device
 - **Coach mark tutorial** — step-by-step guide for first-time users
@@ -161,6 +163,7 @@ get-the-word-solver/
 │   │   ├── RandomWordModal.jsx   # dice, drawn from the current answers
 │   │   ├── ConfirmModal.jsx      # reset / level-change confirmation
 │   │   ├── LaunchScreen.jsx      # in-app splash for the installed app
+│   │   ├── UpdateBanner.jsx      # offers a reload when a new build is ready
 │   │   ├── InstallButton.jsx     # one-tap install where supported
 │   │   ├── InstallGuideModal.jsx # step-by-step guide for iOS and desktop
 │   │   └── InstallProgressModal.jsx  # offline precache progress

@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react';
 import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { playTestSound, getAudioReport } from '../utils/sound';
+import { playTestSound, getAudioReport, unlockAudio } from '../utils/sound';
 import SessionManager from './SessionManager';
 import { isIOS } from '../utils/platform';
 import ChangelogModal from './ChangelogModal';
@@ -13,6 +13,24 @@ const themeKeys = Object.keys(THEMES);
 export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
   const [showSessions, setShowSessions] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  // There is no permission prompt for audio: a browser starts it only from a
+  // gesture. When it has not started yet, this offers a button whose click is
+  // that gesture, which is the closest thing to asking for permission.
+  const [audioBlocked, setAudioBlocked] = useState(() => getAudioReport().state !== 'running');
+
+  const handleEnableSound = () => {
+    unlockAudio();
+    setTimeout(() => {
+      const { state } = getAudioReport();
+      setAudioBlocked(state !== 'running');
+      if (state === 'running') {
+        playTestSound();
+        gooeyToast.success(t.soundWorking, isIOS() ? { description: t.soundIOSHint, duration: 7000 } : { duration: 3000 });
+      } else {
+        gooeyToast.error(`${t.soundBlocked} (${state})`, { duration: 5000 });
+      }
+    }, 250);
+  };
   const {
     theme, themeName, setThemeName, darkMode, setDarkMode,
     soundEnabled, setSoundEnabled, showDefinition, setShowDefinition,
@@ -49,15 +67,22 @@ export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
   const handleTestSound = () => {
     playTestSound();
     setTimeout(() => {
-      const { state, samples } = getAudioReport();
+      const { state } = getAudioReport();
       if (state !== 'running') {
         gooeyToast.error(`${t.soundBlocked} (${state})`, { duration: 5000 });
         return;
       }
-      gooeyToast.success(`${t.soundWorking} (${samples})`, { duration: 3000 });
-      // Safari mutes Web Audio with the ringer switch, so a running engine can
-      // still be inaudible on an iPhone and only the user can check that.
-      if (isIOS()) gooeyToast.info(t.soundIOSHint, { duration: 6000 });
+      // On iPhone the engine can run and still be silent, because Safari follows
+      // the ringer switch — that caveat goes in the description rather than
+      // being appended to every platform's message.
+      if (isIOS()) {
+        gooeyToast.success(t.soundWorking, {
+          description: t.soundIOSHint,
+          duration: 7000,
+        });
+      } else {
+        gooeyToast.success(t.soundWorking, { duration: 3000 });
+      }
     }, 400);
   };
 
@@ -194,7 +219,17 @@ export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
             </span>
           </span>
           <div className="flex items-center gap-2 shrink-0">
-            {soundEnabled && (
+            {soundEnabled && audioBlocked && (
+              <button
+                onClick={handleEnableSound}
+                className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg border-2 text-xs font-bold shrink-0 active:scale-95 transition-transform touch-manipulation"
+                style={{ borderColor: theme.border, backgroundColor: theme.btnPrimary, color: '#1e293b' }}
+              >
+                <Icon icon="tabler:volume" width={14} />
+                {t.enableSound}
+              </button>
+            )}
+            {soundEnabled && !audioBlocked && (
               <button
                 onClick={handleTestSound}
                 className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg border-2 text-xs font-bold shrink-0 active:scale-95 transition-transform touch-manipulation"

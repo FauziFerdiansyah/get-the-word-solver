@@ -5,6 +5,31 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.12.0
+
+- **The "Disalin" alert on Android** was the `title` attribute on the copy button:
+  browsers render it as a native tooltip, which after a tap reads as a second,
+  unstyled popup. `aria-label` carries the same text without drawing anything.
+- **There is no audio permission to request.** Browsers gate audio on a user
+  gesture, not on a permission, so `navigator.permissions` has nothing to offer
+  here. The closest equivalent is a button whose click is itself the gesture:
+  "Aktifkan Suara", shown only while `getAudioReport().state !== 'running'`.
+- **Launching the installed app from the browser is not possible.** No API exists
+  for it (`getInstalledRelatedApps` can detect, never launch), so the install
+  progress just closes with "Berhasil Diinstall" rather than pretending.
+- **Updating an installed app**, which is what the user asked about: no store, no
+  update API. The signal is `CACHE_NAME` in `sw.js` changing each release, which
+  makes it a different file, so the browser installs a new worker. `main.jsx`
+  listens for `updatefound` plus an already-`waiting` worker, calls
+  `registration.update()` on launch since an installed app does not always
+  re-check, and fires `ws-update-ready`. `UpdateBanner` offers a reload that
+  deletes the caches first — without that, a network-first worker can still hand
+  back the old bundle.
+- Toast descriptions: `gooeyToast` takes `description`, so the iOS ringer-switch
+  caveat sits under the title instead of being concatenated for every platform.
+
+---
+
 ## 2026-08-23 — v2.11.1
 
 **iOS had no sound while Android did.** The bug was the unlock being one-shot:

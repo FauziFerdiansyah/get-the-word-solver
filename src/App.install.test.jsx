@@ -79,7 +79,7 @@ describe('PWA manifest', () => {
   });
 
   it('registers a service worker with a fetch handler', () => {
-    expect(readFileSync('src/main.jsx', 'utf8')).toMatch(/serviceWorker\.register/);
+    expect(readFileSync('src/main.jsx', 'utf8')).toMatch(/serviceWorker[\s\S]{0,40}\.register\(/);
     expect(readFileSync('public/sw.js', 'utf8')).toMatch(/addEventListener\('fetch'/);
   });
 });
