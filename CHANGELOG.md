@@ -4,6 +4,29 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.14.0 — 2026-08-23
+
+### Added
+
+- **Key sound settings**, in a popup of their own: a volume slider and a choice of
+  switch, grouped by characteristic — Linear (Cherry MX Red, Cherry MX Black),
+  Tactile (Cherry MX Brown) and Clicky (Cherry MX Blue). Picking one plays it, so
+  the choice is audible rather than a guess. Only the switch in use is downloaded.
+
+### Fixed
+
+- **A toast description sat beside the title instead of under it.** The centring
+  rule added in 2.11.0 made the toast body a flex row; the library lays the
+  description out as a block below the header and spaces it with `margin-top`.
+  It is a column now.
+
+### Notes
+
+- Gateron switches were requested but cannot be offered: the Mechvibes packs are
+  the licensed source used here, and that repository has none. Of the packs it does
+  have, only the Cherry MX family ships the per-key format this needs — the others
+  either use one file per key or define a handful of keys.
+
 ## 2.13.0 — 2026-08-23
 
 ### Added

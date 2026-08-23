@@ -5,6 +5,7 @@ import { playTestSound, getAudioReport, unlockAudio } from '../utils/sound';
 import SessionManager from './SessionManager';
 import { isIOS } from '../utils/platform';
 import ChangelogModal from './ChangelogModal';
+import SoundModal from './SoundModal';
 import { THEMES } from '../data/themes';
 import { gooeyToast } from 'goey-toast';
 
@@ -13,6 +14,7 @@ const themeKeys = Object.keys(THEMES);
 export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
   const [showSessions, setShowSessions] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showSound, setShowSound] = useState(false);
   // There is no permission prompt for audio: a browser starts it only from a
   // gesture. When it has not started yet, this offers a button whose click is
   // that gesture, which is the closest thing to asking for permission.
@@ -217,6 +219,17 @@ export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
             <span className="text-[11px] font-normal" style={{ color: theme.textMuted }}>
               {t.soundEffectNote}
             </span>
+            {soundEnabled && (
+              <button
+                type="button"
+                onClick={() => setShowSound(true)}
+                className="mt-1 self-start flex items-center gap-1.5 rounded-lg border-2 px-2.5 py-1.5 text-[11px] font-bold active:scale-95 transition-transform touch-manipulation"
+                style={{ borderColor: theme.border, backgroundColor: theme.accent, color: theme.text }}
+              >
+                <Icon icon="tabler:adjustments" width={13} />
+                {t.soundSettings}
+              </button>
+            )}
           </span>
           <div className="flex items-center gap-2 shrink-0">
             {soundEnabled && audioBlocked && (
@@ -279,6 +292,8 @@ export default function SettingsModal({ onClose, snapshot, onRestoreSession }) {
         )}
 
         {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
+
+        {showSound && <SoundModal onClose={() => setShowSound(false)} />}
 
         {showSessions && (
           <SessionManager

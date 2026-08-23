@@ -87,9 +87,15 @@ button, [role="button"], a, input[type="button"], input[type="submit"] {
 /* Goey Toast overrides.
    .gooey-content had no flex of its own, and .gooey-title carries asymmetric
    padding (0 4px 2px 2px), which left the label sitting off-centre inside the
-   blob. */
+   blob.
+
+   flex-direction MUST stay column. The library lays the description out as a
+   block under the header and spaces it with `margin-top: 16px`; giving the
+   container a default row direction put the description beside the title
+   instead of below it. */
 .gooey-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
   align-content: center;
   justify-content: center;
@@ -102,6 +108,10 @@ button, [role="button"], a, input[type="button"], input[type="submit"] {
 .gooey-title {
   padding: 0 2px;
   white-space: normal;
+  text-align: center;
+}
+
+.gooey-description {
   text-align: center;
 }
 

@@ -5,6 +5,28 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.14.0
+
+- **The toast description bug was mine.** v2.11.0 added `display: flex` to
+  `.gooey-content` to centre the label, which made the title and description
+  siblings in a row. The library styles `.gooey-description` with `margin-top:
+  16px`, i.e. it expects normal block flow beneath the header. `flex-direction:
+  column` fixes it. Also learned while debugging: the description is revealed by a
+  ~330 ms morph animation, so a test has to wait past it — not a hover state.
+- **Which switches are possible was checked before promising any.** The Mechvibes
+  repo has 18 packs and no Gateron. Of the rest, only `cherrymx-*` are
+  `key_define_type: "single"` with all 27 keys defined; `nk-cream` is `multi` (one
+  .wav per key, 27 requests) and `holy-pandas` defines almost nothing under the
+  scancodes used here. The generator now asserts both conditions and throws rather
+  than emitting a half-working pack.
+- `scripts/build-key-sounds.mjs` builds one sprite per switch into `public/keys/`
+  and writes `src/data/switches.js`, so the engine's switch list cannot drift from
+  the files on disk. 4 × 64 kB on disk, one fetched per session.
+- Volume and switch live in ThemeContext but the engine keeps them in module
+  state, so they are pushed to it in effects — it has no access to context.
+
+---
+
 ## 2026-08-23 — v2.13.0
 
 SEO pass, with the requirement that a fork adapts on its own.

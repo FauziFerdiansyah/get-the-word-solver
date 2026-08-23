@@ -1,5 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { THEMES } from '../data/themes';
+import { DEFAULT_SWITCH, getSwitch } from '../data/switches';
+import { setSoundSwitch, setSoundVolume } from '../utils/sound';
 import { LANG } from '../data/i18n';
 
 const ThemeContext = createContext();
@@ -13,6 +15,13 @@ export function ThemeProvider({ children }) {
   const [multiExcluded, setMultiExcluded] = useState(() => localStorage.getItem('ws-multi') === 'true');
   const [highContrast, setHighContrast] = useState(() => localStorage.getItem('ws-contrast') === 'true');
   const [showHints, setShowHints] = useState(() => localStorage.getItem('ws-hints') !== 'false');
+  const [soundSwitch, setSoundSwitchId] = useState(
+    () => getSwitch(localStorage.getItem('ws-switch') || DEFAULT_SWITCH).id
+  );
+  const [soundVolume, setSoundVolumeValue] = useState(() => {
+    const stored = Number(localStorage.getItem('ws-volume'));
+    return Number.isFinite(stored) && stored > 0 ? Math.min(stored, 1) : 0.85;
+  });
   const [lang, setLang] = useState(() => localStorage.getItem('ws-lang') || 'id');
 
   useEffect(() => { localStorage.setItem('ws-theme', themeName); }, [themeName]);
@@ -23,6 +32,17 @@ export function ThemeProvider({ children }) {
   useEffect(() => { localStorage.setItem('ws-multi', multiExcluded); }, [multiExcluded]);
   useEffect(() => { localStorage.setItem('ws-contrast', highContrast); }, [highContrast]);
   useEffect(() => { localStorage.setItem('ws-hints', showHints); }, [showHints]);
+
+  // The engine keeps these in module state, so they are pushed rather than read:
+  // it has no access to React context.
+  useEffect(() => {
+    localStorage.setItem('ws-switch', soundSwitch);
+    setSoundSwitch(soundSwitch);
+  }, [soundSwitch]);
+  useEffect(() => {
+    localStorage.setItem('ws-volume', soundVolume);
+    setSoundVolume(soundVolume);
+  }, [soundVolume]);
   useEffect(() => {
     localStorage.setItem('ws-lang', lang);
     document.documentElement.lang = lang;
@@ -100,6 +120,8 @@ export function ThemeProvider({ children }) {
       multiExcluded, setMultiExcluded,
       highContrast, setHighContrast,
       showHints, setShowHints,
+      soundSwitch, setSoundSwitchId,
+      soundVolume, setSoundVolumeValue,
       lang, setLang, t,
     }}>
       {children}

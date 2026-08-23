@@ -11,16 +11,20 @@
 // bottom-out tick, with frequencies kept above ~240 Hz because phone speakers
 // roll off hard below that.
 
-const KEY_SPRITE = './keys.mp3';
-// Letters in QWERTY order, then Backspace — must match build-key-sounds.mjs.
-const SPRITE_LAYOUT = [...'QWERTYUIOPASDFGHJKLZXCVBNM', 'BACKSPACE'];
-const SPRITE_SLOT = 0.3; // seconds per letter, must match build-key-sounds.mjs
+import { SWITCH_LAYOUT, SWITCH_SLOT_MS, DEFAULT_SWITCH, getSwitch } from '../data/switches';
+
+const SPRITE_LAYOUT = SWITCH_LAYOUT;
+const SPRITE_SLOT = SWITCH_SLOT_MS / 1000;
 const ERROR_SOUND = './error.wav';
 const BELL_SOUND = './bell.wav';
 
 let audioCtx = null;
 let noiseBuffer = null;
-let keySprite = null;
+// One decoded sprite per switch, so flipping back and forth costs nothing after
+// the first load. Only the chosen switch is ever fetched.
+const sprites = new Map();
+let currentSwitch = DEFAULT_SWITCH;
+let volume = 1;
 let errorBuffer = null;
 let bellBuffer = null;
 
@@ -75,6 +79,47 @@ function withContext(play) {
   });
 }
 
+// Loads a switch's sprite, once. Safe to call before any gesture: it needs a
+// context, so it quietly does nothing until there is one.
+export function loadSwitch(id = currentSwitch) {
+  const entry = getSwitch(id);
+  if (sprites.has(entry.id)) return Promise.resolve(sprites.get(entry.id));
+  const ctx = getCtx();
+  if (!ctx) return Promise.resolve(null);
+  return loadBuffer(ctx, entry.file)
+    .then((buffer) => {
+      sprites.set(entry.id, buffer);
+      return buffer;
+    })
+    .catch(() => {
+      // Remembered as unavailable so it is not retried on every press; the
+      // synthesised voices cover this switch instead.
+      sprites.set(entry.id, null);
+      return null;
+    });
+}
+
+// Which switch the key sounds come from.
+export function setSoundSwitch(id) {
+  currentSwitch = getSwitch(id).id;
+  loadSwitch(currentSwitch);
+}
+
+export function getSoundSwitch() {
+  return currentSwitch;
+}
+
+// 0 to 1, applied on top of each layer's own level.
+export function setSoundVolume(next) {
+  volume = Math.min(Math.max(Number(next) || 0, 0), 1);
+}
+
+export function getSoundVolume() {
+  return volume;
+}
+
+const activeSprite = () => sprites.get(currentSwitch) || null;
+
 // Reported by the Test button in Settings so a silent device can be diagnosed.
 export function getAudioState() {
   if (typeof window === 'undefined') return 'unsupported';
@@ -89,7 +134,9 @@ export function getAudioState() {
 export function getAudioReport() {
   return {
     state: getAudioState(),
-    samples: keySprite ? 'loaded' : 'synth',
+    samples: activeSprite() ? 'loaded' : 'synth',
+    switchId: currentSwitch,
+    volume,
     unlockAttempts,
     sampleRate: audioCtx?.sampleRate ?? 0,
   };
@@ -126,9 +173,7 @@ export async function warmUp() {
   // The sprite is fetched on the first gesture rather than at page load, so a
   // muted visitor never pays for it. That means the very first press of a
   // session falls back to the synth; every press after it is the real sample.
-  loadBuffer(ctx, KEY_SPRITE)
-    .then((buffer) => { keySprite = buffer; })
-    .catch(() => { keySprite = null; });
+  loadSwitch(currentSwitch);
   try {
     const [e, b] = await Promise.all([
       loadBuffer(ctx, ERROR_SOUND),
@@ -262,7 +307,7 @@ function press(ctx, letter, level, offset = 0) {
   const at = startTime(ctx) + offset;
 
   const master = ctx.createGain();
-  master.gain.value = level * (0.92 + Math.random() * 0.16);
+  master.gain.value = level * volume * (0.92 + Math.random() * 0.16);
   master.connect(ctx.destination);
 
   // 1. leaf click
@@ -302,12 +347,12 @@ function press(ctx, letter, level, offset = 0) {
 function sample(ctx, key, level, offset = 0) {
   const index = SPRITE_LAYOUT.indexOf(key.toUpperCase());
   const source = ctx.createBufferSource();
-  source.buffer = keySprite;
+  source.buffer = activeSprite();
   // A touch of pitch variation so holding a key down is not a machine gun.
   source.playbackRate.value = jitter(1, 0.03);
 
   const gain = ctx.createGain();
-  gain.gain.value = level;
+  gain.gain.value = level * volume;
 
   source.connect(gain);
   gain.connect(ctx.destination);
@@ -317,7 +362,7 @@ function sample(ctx, key, level, offset = 0) {
 // Key down: a real switch recording once the sprite is in, the synth until then.
 export function playKeySound(letter = '') {
   withContext((ctx) => {
-    if (keySprite) sample(ctx, letter, 0.85);
+    if (activeSprite()) sample(ctx, letter, 0.85);
     else press(ctx, letter, 0.9);
   });
 }
@@ -326,7 +371,7 @@ export function playKeySound(letter = '') {
 // recording, and a lower, shorter synth click when the sprite is not in yet.
 export function playDeleteSound() {
   withContext((ctx) => {
-    if (keySprite) sample(ctx, 'BACKSPACE', 0.8);
+    if (activeSprite()) sample(ctx, 'BACKSPACE', 0.8);
     else press(ctx, 'Z', 0.75);
   });
 }
@@ -335,13 +380,13 @@ export function playDeleteSound() {
 // including its release, so there is nothing to add on top of them — this only
 // fires for the synthesised fallback.
 export function playKeyUpSound(letter = '') {
-  if (keySprite) return;
+  if (activeSprite()) return;
   withContext((ctx) => {
     const voice = VOICES[letter.toUpperCase()] || DEFAULT_VOICE;
     const at = startTime(ctx);
 
     const master = ctx.createGain();
-    master.gain.value = 0.4;
+    master.gain.value = 0.4 * volume;
     master.connect(ctx.destination);
 
     noiseBurst(ctx, master, {
@@ -360,7 +405,7 @@ export function playKeyUpSound(letter = '') {
 export function playTestSound() {
   withContext((ctx) => {
     'KEYS'.split('').forEach((letter, i) => {
-      if (keySprite) sample(ctx, letter, 0.85, i * 0.16);
+      if (activeSprite()) sample(ctx, letter, 0.85, i * 0.16);
       else press(ctx, letter, 0.9, i * 0.13);
     });
   });

@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { readFileSync, statSync } from 'node:fs';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SWITCHES } from './data/switches';
 import App from './App';
 
 const setup = () => {
@@ -109,20 +110,30 @@ describe('keyboard section', () => {
 });
 
 describe('key sound samples', () => {
-  it('ships one recorded slot per letter', () => {
-    const size = statSync('public/keys.mp3').size;
-    expect(size).toBeGreaterThan(10_000);
-    expect(size).toBeLessThan(150_000); // must stay light for a static app
+  it('ships one sprite per switch, each light enough for the web', () => {
+    for (const entry of SWITCHES) {
+      const file = `public/${entry.file.replace('./', '')}`;
+      const size = statSync(file).size;
+      expect(size).toBeGreaterThan(10_000);
+      expect(size).toBeLessThan(150_000);
+    }
+    // Only the chosen switch is fetched, so the total is not a download cost.
+    expect(SWITCHES.length).toBeGreaterThanOrEqual(4);
+  });
 
-    const engine = readFileSync('src/utils/sound.js', 'utf8');
+  it('keeps the slot layout identical on both sides of the pipeline', () => {
     const builder = readFileSync('scripts/build-key-sounds.mjs', 'utf8');
-    // The slot width has to agree between the generator and the player.
-    expect(engine).toMatch(/SPRITE_SLOT = 0\.3/);
+    const data = readFileSync('src/data/switches.js', 'utf8');
     expect(builder).toMatch(/SLOT_MS = 300/);
-    // 26 letters plus Backspace, in the same order on both sides.
-    const layout = /\[\.\.\.'QWERTYUIOPASDFGHJKLZXCVBNM', 'BACKSPACE'\]/;
-    expect(engine).toMatch(layout);
-    expect(builder).toMatch(layout);
+    expect(data).toMatch(/SWITCH_SLOT_MS = 300/);
+    // The generated data file is what the engine reads, so they cannot drift.
+    expect(readFileSync('src/utils/sound.js', 'utf8')).toContain("from '../data/switches'");
+    expect(data).toContain('"BACKSPACE"');
+  });
+
+  it('covers all three switch characteristics', () => {
+    const feels = new Set(SWITCHES.map((s) => s.feel));
+    expect([...feels].sort()).toEqual(['clicky', 'linear', 'tactile']);
   });
 
   it('credits the sample source', () => {

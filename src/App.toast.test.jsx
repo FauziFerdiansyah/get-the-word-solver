@@ -122,7 +122,9 @@ describe('renamed settings labels', () => {
     expect(screen.getByText('Mode Malam')).toBeTruthy();
     expect(screen.getByText('Efek Suara Ketik')).toBeTruthy();
     // And explains what the sound actually is.
-    expect(screen.getByText(/Cherry MX Blue/)).toBeTruthy();
+    expect(screen.getByText(/Rekaman switch mekanik asli/)).toBeTruthy();
+    // The switch names live in the sound popup now, not in this note.
+    expect(screen.getByRole('button', { name: /Atur Suara Ketik/ })).toBeTruthy();
   });
 
   it('gives the sound button an icon', async () => {

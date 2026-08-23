@@ -22,7 +22,7 @@ A lightweight, mobile-first web app to help you find answers for **Get The Word!
 - **Curated word list** — auto-generated and cross-checked against WordNet, two frequency corpora and the official Wordle answer list; no plurals, inflections, proper nouns, abbreviations or slang
 - **6 color themes** — Wordle Classic, Mint Fresh, Sunset Warm, Ocean Blue, Lavender Dream, + Colorblind mode
 - **Dark/Light mode** — neo-brutalism styling adapts beautifully to both
-- **Mechanical key sounds** — a real Cherry MX Blue recording per letter, 62 kB for all 26, with a synthesised fallback and a "Test" button in Settings
+- **Mechanical key sounds** — real switch recordings per letter, with a volume slider and a choice of Cherry MX Blue (clicky), Brown (tactile), Red and Black (linear); only the chosen pack is downloaded
 - **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
 - **Hideable hints** — switch the explanations off once you know the app
 - **In-app version history** — every release note, read straight from CHANGELOG.md
@@ -173,7 +173,11 @@ get-the-word-solver/
 │   ├── sitemap.xml               # generated from VITE_SITE_URL
 │   ├── screen-light.svg          # launch screen backgrounds
 │   ├── screen-dark.svg
-│   ├── keys.mp3                  # generated: 27 key samples in 300ms slots
+│   ├── keys/                     # generated: one 27-slot sprite per switch
+│   │   ├── cherrymx-blue.mp3
+│   │   ├── cherrymx-brown.mp3
+│   │   ├── cherrymx-red.mp3
+│   │   └── cherrymx-black.mp3
 │   ├── error.wav                 # error and success cues
 │   ├── bell.wav
 │   ├── word.png                  # favicon
@@ -198,6 +202,7 @@ get-the-word-solver/
 │   │   ├── SettingsModal.jsx     # themes, language, sound, toggles
 │   │   ├── SessionManager.jsx    # sessions popup: save / open / delete
 │   │   ├── ChangelogModal.jsx    # version history, parsed from CHANGELOG.md
+│   │   ├── SoundModal.jsx        # key sound volume and switch choice
 │   │   ├── CoachMark.jsx         # 8-step walkthrough
 │   │   ├── RandomWordModal.jsx   # dice, drawn from the current answers
 │   │   ├── ConfirmModal.jsx      # reset / level-change confirmation
@@ -212,7 +217,8 @@ get-the-word-solver/
 │   │   ├── words.js              # GENERATED, rank-ordered word lists
 │   │   ├── themes.js             # 6 colour themes
 │   │   ├── i18n.js               # id / en strings
-│   │   └── changelog.js          # parses CHANGELOG.md for the in-app history
+│   │   ├── changelog.js          # parses CHANGELOG.md for the in-app history
+│   │   └── switches.js           # GENERATED, switch list for the sound packs
 │   ├── utils/
 │   │   ├── solver.js             # findMatches (1 row), findMatchesFromBoard (6)
 │   │   ├── sound.js              # sample playback + synth fallback

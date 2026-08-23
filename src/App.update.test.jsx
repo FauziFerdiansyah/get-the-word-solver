@@ -73,8 +73,10 @@ describe('sound on iOS', () => {
     await user.click(screen.getByRole('button', { name: /Tes|Aktifkan Suara/ }));
 
     await waitFor(() => expect(screen.getByText('Suara aktif dan berfungsi.')).toBeTruthy());
-    // The caveat is a description under the title, not glued onto it.
-    expect(screen.getByText(/tombol senyap/)).toBeTruthy();
+    // The description is a separate block that the library reveals after its
+    // ~330ms morph, so it needs waiting for — and it must be its own element,
+    // not text glued onto the title.
+    await waitFor(() => expect(screen.getByText(/tombol senyap/)).toBeTruthy(), { timeout: 3000 });
     expect(screen.getByText('Suara aktif dan berfungsi.').textContent).not.toMatch(/senyap/);
   });
 
@@ -86,6 +88,7 @@ describe('sound on iOS', () => {
     await user.click(screen.getByRole('button', { name: /Tes|Aktifkan Suara/ }));
 
     await waitFor(() => expect(screen.getByText('Suara aktif dan berfungsi.')).toBeTruthy());
+    await new Promise((resolve) => setTimeout(resolve, 600)); // past the morph
     expect(screen.queryByText(/tombol senyap/)).toBeNull();
   });
 });
