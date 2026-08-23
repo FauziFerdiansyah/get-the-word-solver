@@ -1,6 +1,6 @@
-# 🟩 Get the Word Solver
+# 🟩 Get The Word Solver
 
-A lightweight, mobile-first web app to help you solve **Wordle** and **Get the Word** (Microsoft) puzzles instantly — fully client-side, no API needed.
+A lightweight, mobile-first web app to help you find answers for **Get The Word!** (Microsoft) and **Wordle** puzzles instantly — fully client-side, no API needed.
 
 ![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?logo=vite&logoColor=white)
 ![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react&logoColor=white)
@@ -26,7 +26,7 @@ A lightweight, mobile-first web app to help you solve **Wordle** and **Get the W
 - **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
 - **Hideable hints** — switch the explanations off once you know the app
 - **Random word** — drawn from the words currently matching your clues, common tier first
-- **Saved sessions** — keep a puzzle you are working on and reopen it later, stored on your device
+- **Saved sessions** — keep a puzzle you are working on and reopen it later, with a preview and the exact time it was saved; stored on your device
 - **Coach mark tutorial** — step-by-step guide for first-time users
 - **Mobile-first responsive** — fluid tiles that fit a 320px phone at every word length, 10-column keyboard grid, 44px tap targets, and 16px inputs so iOS never zooms on focus; desktop shows a 50/50 split
 - **Installable (PWA)** — one-tap install where the browser supports it, plus an illustrated step-by-step guide on iOS; correctly sized 192/512/maskable icons and a top bar that matches the theme
@@ -152,8 +152,8 @@ get-the-word-solver/
 │   │   ├── BoardGrid.jsx         # 6-row board, one guess per row
 │   │   ├── Keyboard.jsx          # 20-column grid, letter crossing-out
 │   │   ├── ResultsList.jsx       # ranked suggestions, tier tabs, copy
-│   │   ├── SettingsModal.jsx     # themes, language, sound, toggles, sessions
-│   │   ├── SessionManager.jsx    # save / open / delete saved sessions
+│   │   ├── SettingsModal.jsx     # themes, language, sound, toggles
+│   │   ├── SessionManager.jsx    # sessions popup: save / open / delete
 │   │   ├── CoachMark.jsx         # 8-step walkthrough
 │   │   ├── RandomWordModal.jsx   # dice, drawn from the current answers
 │   │   ├── ConfirmModal.jsx      # reset / level-change confirmation

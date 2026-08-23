@@ -1,6 +1,6 @@
 # Software Requirements Specification
 
-Version: 2.0.0 · Applies to: Wordle Solver / Get the Word Solver
+Version: 2.0.0 · Applies to: Get The Word Solver
 
 ## 1. Purpose
 

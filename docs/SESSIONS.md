@@ -5,6 +5,40 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.8.0
+
+Sessions reworked into a popup after the first version was a block inside the
+settings sheet, where the growing list pushed the toggles down.
+
+- `SessionManager` is now a dialog with the same shape as the other sheets:
+  bordered sticky header, slot counter, full screen on a phone.
+- `formatSavedAt` uses `Intl.DateTimeFormat` with the app language, printing
+  weekday, date and h:m:s. Wrapped in try/catch and falling back to ISO, because
+  a bad locale tag or a stale timestamp should not take the list down.
+- `sessionPreview` returns the tiles to draw: the placed letters for single-row
+  mode, or the last board row with content — that is the guess in progress, which
+  is what makes a session recognisable.
+- Delete is two taps, done inline rather than with a nested ConfirmModal; stacking
+  dialogs on a phone is worse than a row that changes its buttons.
+
+Test note: the per-session Open button disappears while a row is in its confirm
+state, so a test that waits for it after tapping delete will fail. Assert the
+Cancel button instead.
+
+---
+
+## 2026-08-23 — v2.7.1
+
+Renamed the app to "Get The Word Solver". The name appeared in seven places —
+i18n (both languages), the `<title>`, three meta tags, the manifest's `name` and
+`short_name`, and hardcoded in SettingsModal's version line. The last one now
+reads `t.appTitle`, so there is one fewer copy to forget. A test asserts the name
+in every surface and that the old one appears nowhere.
+
+`short_name` is "GTW Solver": a launcher truncates anything much longer.
+
+---
+
 ## 2026-08-23 — v2.7.0
 
 - **Saved sessions** in `src/utils/sessions.js` plus a `SessionManager` inside the

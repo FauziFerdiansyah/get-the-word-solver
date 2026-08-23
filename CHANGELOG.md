@@ -4,6 +4,34 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.8.0 — 2026-08-23
+
+### Changed
+
+- **Sessions moved into their own popup**, opened from a button in Settings. As a
+  block inside the settings sheet the list pushed everything else down and had to
+  be scrolled past.
+- Each saved session now shows **the full date and time it was saved**, down to the
+  second, in the app's language — two saves a minute apart are told apart at a
+  glance.
+- Each row previews the puzzle it holds: the placed letters in their colours for
+  1 Row mode, or the last row with anything in it for the 6 Rows board. A session
+  is recognisable without relying on its name.
+- Deleting takes two taps: the first swaps the row's buttons for a Delete/Cancel
+  pair, so a stray tap cannot lose saved work.
+- The section title is capitalised: "Simpan & Buka Sesi".
+- The header counts the slots in use, e.g. `3/12`.
+
+## 2.7.1 — 2026-08-23
+
+### Changed
+
+- Renamed to **Get The Word Solver**, subtitle "Cari jawaban Get The Word! /
+  Wordle". Applied to the in-app header, the tab title, the SEO and social
+  metadata, the iOS home screen label, the manifest (`short_name` "GTW Solver",
+  which fits under a launcher icon) and the version line in Settings, which now
+  reads the name from i18n instead of repeating it.
+
 ## 2.7.0 — 2026-08-23
 
 ### Added

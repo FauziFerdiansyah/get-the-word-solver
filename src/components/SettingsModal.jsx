@@ -1,4 +1,5 @@
 import { Icon } from '@iconify/react';
+import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { playTestSound, getAudioState } from '../utils/sound';
 import SessionManager from './SessionManager';
@@ -8,6 +9,7 @@ import { gooeyToast } from 'goey-toast';
 const themeKeys = Object.keys(THEMES);
 
 export default function SettingsModal({ open, onClose, snapshot, onRestoreSession }) {
+  const [showSessions, setShowSessions] = useState(false);
   const {
     theme, themeName, setThemeName, darkMode, setDarkMode,
     soundEnabled, setSoundEnabled, showDefinition, setShowDefinition,
@@ -201,9 +203,38 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
           </div>
         </div>
 
-        {/* Saved sessions */}
+        {/* Saved sessions live in their own popup: the list grows, and burying
+            it between toggles meant scrolling past all of Settings to reach it. */}
         {snapshot && onRestoreSession && (
-          <SessionManager snapshot={snapshot} onRestore={onRestoreSession} />
+          <div className="flex items-start justify-between gap-3 py-3 border-b" style={{ borderColor: theme.border + '40' }}>
+            <span className="text-sm font-semibold flex flex-col gap-0.5" style={{ color: theme.text }}>
+              <span className="flex items-center gap-2">
+                <Icon icon="tabler:bookmarks" width={18} />
+                {t.sessions}
+              </span>
+              <span className="text-[11px] font-normal" style={{ color: theme.textMuted }}>
+                {t.sessionsNote}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSessions(true)}
+              aria-label={t.sessionsManage}
+              className="flex items-center gap-1.5 rounded-lg border-2 px-3 py-2 text-xs font-bold shrink-0 transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] touch-manipulation"
+              style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: '#1e293b', boxShadow: `2px 2px 0px 0px ${theme.shadow}` }}
+            >
+              {t.sessionsOpen}
+              <Icon icon="tabler:chevron-right" width={14} />
+            </button>
+          </div>
+        )}
+
+        {showSessions && (
+          <SessionManager
+            snapshot={snapshot}
+            onRestore={onRestoreSession}
+            onClose={() => setShowSessions(false)}
+          />
         )}
 
         {/* High Contrast */}
@@ -390,7 +421,7 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
           </a>
 
           <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.textMuted }}>
-            Wordle Solver v{__APP_VERSION__}
+            {t.appTitle} v{__APP_VERSION__}
           </p>
         </div>
       </div>

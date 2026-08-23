@@ -3,7 +3,7 @@
 Instructions for AI agents working on this repository. Read this before making
 changes. Human contributors should read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-- **Project**: Wordle Solver / Get the Word Solver — a static, client-only web app
+- **Project**: Get The Word Solver — a static, client-only web app
   that suggests answers for 4, 5 and 6 letter word puzzles.
 - **Stack**: Vite + React 19 + Tailwind CSS 4, Vitest + Testing Library, no backend.
 - **Current version**: see `version` in [package.json](package.json) — it is the

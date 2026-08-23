@@ -5,7 +5,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import {
   listSessions, saveSession, removeSession, clearSessions, isValidSession, MAX_SESSIONS,
 } from './utils/sessions';
+import { LANG } from './data/i18n';
 import App from './App';
+
+const LANG_TITLES = { id: LANG.id.sessions, en: LANG.en.sessions };
 
 const renderApp = () => {
   const user = userEvent.setup();
@@ -19,8 +22,15 @@ const renderApp = () => {
 
 const greenBox = (n) => screen.getByLabelText(`Huruf hijau posisi ${n}`);
 const boardCell = (row, col) => screen.getByLabelText(`Baris ${row}, kotak ${col}`);
-const openSettings = (user) => user.click(screen.getByLabelText('Settings'));
-const saveButton = () => screen.getByRole('button', { name: 'Simpan' });
+// Sessions live in a popup of their own now, reached from Settings.
+const openSessions = async (user) => {
+  await user.click(screen.getByLabelText('Settings'));
+  await user.click(screen.getByLabelText('Kelola sesi tersimpan'));
+};
+const saveButton = () => screen.getByRole('button', { name: /^Simpan$/ });
+const closeSessions = (user) => user.click(
+  within(screen.getByRole('dialog', { name: 'Simpan & Buka Sesi' })).getByLabelText('Tutup')
+);
 
 const validState = (overrides = {}) => ({
   wordLength: 5,
@@ -92,9 +102,10 @@ describe('sessions in the app', () => {
     await user.type(greenBox(1), 'S');
     await user.click(screen.getByRole('button', { name: 'T' })); // cross T out
 
-    await openSettings(user);
+    await openSessions(user);
     await user.type(screen.getByLabelText('Nama sesi'), 'Round one');
     await user.click(saveButton());
+    await closeSessions(user);
     await user.click(screen.getByLabelText('Tutup'));
 
     // Throw the work away…
@@ -103,7 +114,7 @@ describe('sessions in the app', () => {
     expect(greenBox(1).value).toBe('');
 
     // …and get it back.
-    await openSettings(user);
+    await openSessions(user);
     await user.click(screen.getByLabelText('Buka sesi Round one'));
 
     expect(greenBox(1).value).toBe('S');
@@ -116,8 +127,9 @@ describe('sessions in the app', () => {
     await user.click(screen.getByRole('button', { name: /6 Baris/ }));
     await user.type(boardCell(1, 1), 'C');
 
-    await openSettings(user);
+    await openSessions(user);
     await user.click(saveButton());
+    await closeSessions(user);
     await user.click(screen.getByLabelText('Tutup'));
 
     // Move somewhere else entirely.
@@ -125,7 +137,7 @@ describe('sessions in the app', () => {
     await user.click(screen.getByRole('button', { name: 'Ya, Reset' }));
     await user.click(screen.getByRole('button', { name: /1 Baris/ }));
 
-    await openSettings(user);
+    await openSessions(user);
     await user.click(screen.getAllByLabelText(/^Buka sesi/)[0]);
 
     expect(screen.getByRole('button', { name: '4 Huruf' }).style.backgroundColor)
@@ -136,10 +148,11 @@ describe('sessions in the app', () => {
   it('closes settings when a session is opened, so the board is visible', async () => {
     const user = renderApp();
     await user.type(greenBox(1), 'S');
-    await openSettings(user);
+    await openSessions(user);
     await user.click(saveButton());
     await user.click(screen.getAllByLabelText(/^Buka sesi/)[0]);
 
+    expect(screen.queryByRole('dialog', { name: 'Simpan & Buka Sesi' })).toBeNull();
     expect(screen.queryByLabelText('Tutup')).toBeNull();
   });
 
@@ -147,22 +160,31 @@ describe('sessions in the app', () => {
     const user = renderApp();
     await user.type(greenBox(1), 'S');
     await user.type(greenBox(2), 'T');
-    await openSettings(user);
+    await openSessions(user);
     await user.click(saveButton());
 
     const item = screen.getByLabelText(/^Buka sesi/).closest('li');
-    expect(within(item).getByText(/5 Huruf/)).toBeTruthy();
+    expect(within(item).getByText(/5L · 1 Baris/)).toBeTruthy();
     expect(within(item).getByText(/2 kotak terisi/)).toBeTruthy();
+    // Saved at, down to the second, so two nearby saves can be told apart.
+    expect(within(item).getByText(/\d{2}[.:]\d{2}[.:]\d{2}/)).toBeTruthy();
+    // And a preview of the puzzle itself, not just a name.
+    expect(within(item).getAllByText(/^[A-Z]$/).map((el) => el.textContent)).toEqual(['S', 'T']);
   });
 
   it('deletes a session from the list', async () => {
     const user = renderApp();
     await user.type(greenBox(1), 'S');
-    await openSettings(user);
+    await openSessions(user);
     await user.click(saveButton());
     expect(screen.getAllByLabelText(/^Buka sesi/)).toHaveLength(1);
 
+    // Two taps: a stray one should not lose a saved puzzle. The first swaps the
+    // row's buttons for a confirm pair, leaving the session itself untouched.
     await user.click(screen.getByLabelText(/^Hapus sesi/));
+    expect(screen.queryByLabelText(/^Buka sesi/)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Batal' })).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Hapus' }));
     expect(screen.queryByLabelText(/^Buka sesi/)).toBeNull();
     expect(screen.getByText('Belum ada sesi tersimpan.')).toBeTruthy();
   });
@@ -171,9 +193,10 @@ describe('sessions in the app', () => {
     const user = renderApp();
     // Save a single-row session…
     await user.type(greenBox(1), 'S');
-    await openSettings(user);
+    await openSessions(user);
     await user.type(screen.getByLabelText('Nama sesi'), 'clues');
     await user.click(saveButton());
+    await closeSessions(user);
     await user.click(screen.getByLabelText('Tutup'));
 
     // …then work and reset in board mode.
@@ -182,8 +205,70 @@ describe('sessions in the app', () => {
     await user.click(screen.getByRole('button', { name: /Reset/ }));
     await user.click(screen.getByRole('button', { name: 'Ya, Reset' }));
 
-    await openSettings(user);
+    await openSessions(user);
     expect(screen.getByLabelText('Buka sesi clues')).toBeTruthy();
+  });
+});
+
+describe('session popup', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('opens from a button in Settings rather than sitting inside it', async () => {
+    const user = renderApp();
+    await user.click(screen.getByLabelText('Settings'));
+
+    // The list is not in the sheet itself…
+    expect(screen.queryByLabelText('Nama sesi')).toBeNull();
+    expect(screen.getByLabelText('Kelola sesi tersimpan')).toBeTruthy();
+
+    // …it is behind its own dialog.
+    await user.click(screen.getByLabelText('Kelola sesi tersimpan'));
+    const dialog = screen.getByRole('dialog', { name: 'Simpan & Buka Sesi' });
+    expect(within(dialog).getByLabelText('Nama sesi')).toBeTruthy();
+    expect(dialog.firstElementChild.className).toContain('h-full'); // full screen on a phone
+  });
+
+  it('titles the section in capitals as asked', () => {
+    renderApp();
+    expect(LANG_TITLES.id).toBe('Simpan & Buka Sesi');
+    expect(LANG_TITLES.en).toBe('Save & Open Sessions');
+  });
+
+  it('shows the day, month, year and time to the second', async () => {
+    const user = renderApp();
+    await user.type(greenBox(1), 'S');
+    await openSessions(user);
+    await user.click(saveButton());
+
+    const item = screen.getByLabelText(/^Buka sesi/).closest('li');
+    // e.g. "Min, 23 Agu 2026, 15.01.09" — weekday, date, and h:m:s.
+    const stamp = within(item).getByText(/\d{2}[.:]\d{2}[.:]\d{2}/).textContent;
+    expect(stamp).toMatch(/20\d{2}/);
+    expect(stamp).toMatch(/\d{2}\b/);
+    expect(stamp.split(/[.:]/).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('previews the board row the user was on', async () => {
+    const user = renderApp();
+    await user.click(screen.getByRole('button', { name: /6 Baris/ }));
+    await user.type(boardCell(1, 1), 'C');
+    await user.type(boardCell(2, 1), 'M');
+
+    await openSessions(user);
+    await user.click(saveButton());
+
+    const item = screen.getByLabelText(/^Buka sesi/).closest('li');
+    // The last row with anything in it, which is the guess in progress.
+    expect(within(item).getAllByText(/^[A-Z]$/).map((el) => el.textContent)).toEqual(['M']);
+  });
+
+  it('counts how many slots are left', async () => {
+    const user = renderApp();
+    await user.type(greenBox(1), 'S');
+    await openSessions(user);
+    expect(screen.getByText(`0/${MAX_SESSIONS}`)).toBeTruthy();
+    await user.click(saveButton());
+    expect(screen.getByText(`1/${MAX_SESSIONS}`)).toBeTruthy();
   });
 });
 

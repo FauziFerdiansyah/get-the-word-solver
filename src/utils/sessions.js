@@ -90,6 +90,45 @@ export function sessionSummary(state) {
   };
 }
 
+// Day, month, year and time to the second, in the app's language. Two sessions
+// saved a minute apart need to be told apart at a glance.
+export function formatSavedAt(timestamp, lang = 'id') {
+  if (!timestamp) return '';
+  try {
+    return new Intl.DateTimeFormat(lang === 'id' ? 'id-ID' : 'en-GB', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).format(new Date(timestamp));
+  } catch {
+    return new Date(timestamp).toISOString();
+  }
+}
+
+// The letters a session holds, so the list shows the puzzle and not just a name.
+// Single-row mode previews the placed letters; board mode previews its last
+// filled row, which is the guess the user was working on.
+export function sessionPreview(state) {
+  if (!isValidSession(state)) return [];
+  if (state.mode === 'single') {
+    return state.clues.map((letter, i) => ({
+      letter,
+      state: letter ? state.clueStates[i] || 'green' : 'empty',
+    }));
+  }
+  const lastFilled = [...state.board].reverse().find((row) => row.letters.some(Boolean));
+  if (!lastFilled) return state.board[0].letters.map(() => ({ letter: '', state: 'empty' }));
+  return lastFilled.letters.map((letter, i) => ({
+    letter,
+    state: letter ? lastFilled.states[i] || 'gray' : 'empty',
+  }));
+}
+
 export function defaultSessionName(state) {
   const stamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   return `${state?.wordLength ?? '?'}L · ${state?.mode === 'board' ? '6' : '1'} · ${stamp}`;

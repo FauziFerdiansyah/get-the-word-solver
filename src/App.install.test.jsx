@@ -18,6 +18,22 @@ const realSize = (src) => {
 };
 
 describe('PWA manifest', () => {
+  it('carries the app name everywhere it is shown', () => {
+    const html = readFileSync('index.html', 'utf8');
+    const i18n = readFileSync('src/data/i18n.js', 'utf8');
+    // One name, four surfaces: the in-app header, the tab title, the iOS home
+    // screen label and the installed app's own name.
+    expect(i18n).toMatch(/appTitle: 'Get The Word Solver'/);
+    expect(html).toMatch(/<title>Get The Word Solver/);
+    expect(html).toMatch(/apple-mobile-web-app-title" content="Get The Word Solver"/);
+    expect(manifest.name).toBe('Get The Word Solver');
+    // short_name has to survive a home screen label, so it stays short.
+    expect(manifest.short_name.length).toBeLessThanOrEqual(12);
+    for (const source of [html, i18n, JSON.stringify(manifest)]) {
+      expect(source).not.toMatch(/Wordle Solver/);
+    }
+  });
+
   it('declares what an installable app needs', () => {
     expect(manifest.name).toBeTruthy();
     expect(manifest.short_name).toBeTruthy();

@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Wordle Solver - Get the Word",
-  "short_name": "Wordle Solver",
-  "description": "Solve Wordle & Get the Word puzzles instantly",
+  "name": "Get The Word Solver",
+  "short_name": "GTW Solver",
+  "description": "Cari jawaban Get The Word! / Wordle",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
