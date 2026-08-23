@@ -189,8 +189,15 @@ export default function ResultsList({
         </button>
       </div>
 
-      {/* Tier tabs — 'all' is the default, so it needs to be selectable too */}
-      <div className="flex gap-1.5" role="tablist">
+      {/* Tier tabs — 'all' is the default, so it needs to be selectable too.
+          On a phone they stick just below the Clues/Answers bar, whose height is
+          published as --view-switcher-h. They cannot linger on the clue view:
+          this whole panel is display:none there. */}
+      <div
+        className="flex gap-1.5 sticky z-20 -mx-3 px-3 py-2 sm:-mx-4 sm:px-4 lg:static lg:mx-0 lg:px-0 lg:py-0"
+        role="tablist"
+        style={{ top: 'var(--view-switcher-h, 0px)', backgroundColor: theme.bg }}
+      >
         {TABS.map(({ id, label, count, color }) => {
           const active = category === id;
           return (

@@ -4,6 +4,23 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.10.0 — 2026-08-23
+
+### Added
+
+- On a phone, the Semua / Umum / Jarang tabs now pin themselves directly under the
+  Clues / Answers bar as you scroll the answers, and release again when you scroll
+  back up to them. They cannot follow you onto the clue view.
+
+### Changed
+
+- Icons are circular again. The any-purpose icons are transparent, so the launch
+  screen shows the artwork instead of the white square the square icons put on top
+  of it. The maskable icon and the iOS touch icon stay opaque, because the platform
+  crops the first and iOS composites transparency onto black.
+- The button that closes the install progress now reads "Terinstall" rather than
+  "Mengerti".
+
 ## 2.9.1 — 2026-08-23
 
 ### Fixed

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -7,6 +8,22 @@ import { useTheme } from '../contexts/ThemeContext';
 // side by side, so this disappears.
 export default function ViewSwitcher({ view, onSelect, resultCount }) {
   const { theme, t } = useTheme();
+  const barRef = useRef(null);
+
+  // The tier tabs in the results list stick directly underneath this bar, so its
+  // height is published as a custom property rather than hardcoded — padding and
+  // font size differ between breakpoints.
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!bar) return undefined;
+    const publish = () => {
+      document.documentElement.style.setProperty('--view-switcher-h', `${bar.offsetHeight}px`);
+    };
+    publish();
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(publish) : null;
+    observer?.observe(bar);
+    return () => observer?.disconnect();
+  }, []);
 
   const views = [
     { id: 'input', icon: 'tabler:forms', label: t.viewInput },
@@ -15,6 +32,7 @@ export default function ViewSwitcher({ view, onSelect, resultCount }) {
 
   return (
     <div
+      ref={barRef}
       className="lg:hidden sticky top-0 z-30 -mx-3 mb-1 px-3 py-2 sm:-mx-4 sm:px-4"
       style={{ backgroundColor: theme.bg }}
     >

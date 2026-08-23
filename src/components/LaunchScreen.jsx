@@ -45,6 +45,8 @@ export default function LaunchScreen() {
         pointerEvents: phase === 'fading' ? 'none' : 'auto',
       }}
     >
+      {/* icon-512.png is transparent, so the artwork sits on the background art
+          instead of inside a white square. */}
       <img
         src="./icon-512.png"
         alt=""

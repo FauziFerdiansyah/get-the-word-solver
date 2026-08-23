@@ -5,6 +5,25 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.10.0
+
+- **Stacked sticky bars.** The tier tabs stick under the Clues/Answers bar, whose
+  height varies with the breakpoint. Rather than hardcode an offset, ViewSwitcher
+  measures itself with a ResizeObserver and publishes `--view-switcher-h`, which
+  the tabs use as their `top`. Nothing special was needed to keep them off the
+  clue view: that panel is `display:none` there, so a sticky child cannot paint.
+  `lg:static` returns them to normal flow on desktop, where both panels are shown.
+- **Icons back to circular, and transparency now depends on the job.** The
+  any-purpose icons are transparent so the launch screen shows artwork rather than
+  a white square — that white was the whole reason the square icons looked wrong.
+  Maskable stays opaque (the platform crops it) and the iOS touch icon stays opaque
+  (iOS composites transparency onto black). Quantising to 256 colours kept the
+  circle's edge while taking icon-512 from 180 kB to 52 kB.
+- The icon tests were asserting "square and white". Rewritten to assert the
+  reasons instead, so they still mean something after a design change.
+
+---
+
 ## 2026-08-23 — v2.9.1
 
 The README edit for v2.9.0 never ran: it sat behind a `&&` chain whose earlier

@@ -203,7 +203,7 @@ export default function InstallProgressModal({ onClose }) {
           className="py-3 rounded-xl border-2 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] disabled:opacity-50 touch-manipulation"
           style={{ backgroundColor: theme.btnPrimary, borderColor: theme.border, color: '#1e293b', boxShadow: `3px 3px 0px 0px ${theme.shadow}` }}
         >
-          {finished ? t.coachDone : `${percent}%`}
+          {finished ? t.installDone : `${percent}%`}
         </button>
       </div>
     </div>

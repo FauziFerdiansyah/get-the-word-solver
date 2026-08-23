@@ -97,6 +97,38 @@ describe('mobile view switcher', () => {
     expect(sheet.className).toContain('sm:rounded-xl');
   });
 
+  it('sticks the tier tabs directly under the Clues/Answers bar', async () => {
+    const user = setup();
+    await user.type(screen.getByLabelText('Huruf hijau posisi 1'), 'S');
+
+    const tabs = screen.getByRole('tab', { name: /^Semua/ }).parentElement;
+    expect(tabs.className).toContain('sticky');
+    // Offset by the switcher's measured height, not a hardcoded number.
+    expect(tabs.style.top).toBe('var(--view-switcher-h, 0px)');
+    // Opaque, or the list would scroll through it.
+    expect(tabs.style.backgroundColor).toBeTruthy();
+    // Desktop shows both panels at once, so nothing needs pinning there.
+    expect(tabs.className).toContain('lg:static');
+  });
+
+  it('publishes the switcher height for the tabs to sit under', () => {
+    setup();
+    // jsdom reports 0 for offsetHeight, but the property has to be written or
+    // the tabs would stack on top of the switcher on a real device.
+    expect(document.documentElement.style.getPropertyValue('--view-switcher-h')).toMatch(/px$/);
+  });
+
+  it('cannot leave the tier tabs pinned over the clue view', async () => {
+    const user = setup();
+    await user.type(screen.getByLabelText('Huruf hijau posisi 1'), 'S');
+    await user.click(screen.getByRole('tab', { name: /Jawaban/ }));
+    await user.click(screen.getByRole('tab', { name: /Isi Clue/ }));
+
+    // The whole results panel is display:none on the clue view, so a sticky
+    // child of it cannot render.
+    expect(screen.getByTestId('results-panel').className).toContain('hidden');
+  });
+
   it('gives the settings title a bordered header bar that stays put', async () => {
     const user = setup();
     await user.click(screen.getByLabelText('Settings'));

@@ -174,32 +174,38 @@ describe('random word', () => {
   });
 });
 
-describe('icons are square', () => {
+describe('icons', () => {
+  const info = (file, fmt) =>
+    execSync(`magick ${JSON.stringify(`public/${file}`)} -format ${JSON.stringify(fmt)} info:`).toString().trim();
   const contentBox = (file) =>
     execSync(`magick ${JSON.stringify(`public/${file}`)} -alpha off -fuzz 5% -trim -format "%w %h" info:`)
       .toString().trim().split(/\s+/).map(Number);
 
-  it('fills its canvas rather than sitting in a circle', () => {
-    for (const file of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png']) {
-      const [w, h] = contentBox(file);
-      expect(Math.abs(w - h), `${file} is not square`).toBeLessThanOrEqual(4);
-      // A circular logo leaves white corners, so its trimmed box would be
-      // noticeably smaller than the canvas. A square one reaches the edges.
-      const canvas = Number(
-        execSync(`magick ${JSON.stringify(`public/${file}`)} -format "%w" info:`).toString()
-      );
-      expect(w / canvas).toBeGreaterThan(0.97);
+  it('leaves the any-purpose icons transparent', () => {
+    // The launch screen paints this over artwork. An opaque icon put a white
+    // square on top of it, which is what made the square version look wrong.
+    for (const file of ['icon-192.png', 'icon-512.png']) {
+      expect(info(file, '%[opaque]'), `${file} is opaque`).toBe('False');
+      expect(info(file, '%[pixel:p{3,3}]')).toMatch(/,0\)$/); // corner fully clear
     }
   });
 
-  it('keeps the maskable icon square inside the safe zone', () => {
-    const [w, h] = contentBox('icon-maskable-512.png');
-    expect(Math.abs(w - h)).toBeLessThanOrEqual(4);
-    expect(Math.max(w, h)).toBeLessThanOrEqual(410);
+  it('keeps the maskable icon opaque and inside the safe zone', () => {
+    // The platform crops a maskable icon to its own shape over the centre 80%,
+    // so transparency would reveal whatever sits beneath and content wider than
+    // 410px of the 512 canvas gets its edges shaved.
+    expect(info('icon-maskable-512.png', '%[opaque]')).toBe('True');
+    expect(Math.max(...contentBox('icon-maskable-512.png'))).toBeLessThanOrEqual(410);
   });
 
-  it('shows a square icon on the launch screen', () => {
+  it('keeps the Apple touch icon opaque', () => {
+    // iOS composites a transparent touch icon onto black.
+    expect(info('apple-touch-icon.png', '%[opaque]')).toBe('True');
+    expect(info('apple-touch-icon.png', '%[pixel:p{3,3}]')).toMatch(/255,\s*255,\s*255/);
+  });
+
+  it('shows the transparent icon on the launch screen', () => {
     const source = execSync('cat src/components/LaunchScreen.jsx').toString();
-    expect(source).not.toMatch(/rounded-full/);
+    expect(source).toContain('icon-512.png');
   });
 });

@@ -140,8 +140,11 @@ describe('icons and splash art', () => {
     return /255,\s*255,\s*255/.test(out);
   };
 
-  it('gives every installable icon a white background', () => {
-    for (const file of ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png']) {
+  it('gives the icons that must be opaque a white background', () => {
+    // Only these two: a maskable icon is cropped by the platform, and iOS
+    // composites a transparent touch icon onto black. The any-purpose icons stay
+    // transparent so the launch screen shows artwork, not a white square.
+    for (const file of ['icon-maskable-512.png', 'apple-touch-icon.png']) {
       expect(cornerIsWhite(file), `${file} corner is not white`).toBe(true);
     }
   });
@@ -249,6 +252,8 @@ describe('install progress', () => {
     act(() => handlers.appinstalled());
     await waitFor(() => expect(bar.getAttribute('aria-valuenow')).toBe('100'));
     expect(within(dialog).getByText(/Aplikasi siap/)).toBeTruthy();
+    // The closing button reports the outcome rather than saying "Mengerti".
+    expect(within(dialog).getByRole('button', { name: 'Terinstall' })).toBeTruthy();
   });
 
   it('does not appear when the user dismisses the prompt', async () => {
