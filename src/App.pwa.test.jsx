@@ -141,15 +141,15 @@ describe('iOS install guide', () => {
     setUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1');
     renderApp();
 
-    expect(screen.getByRole('button', { name: /Install aplikasi/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /install aplikasi/i })).toBeTruthy();
   });
 
   it('spells out the Safari steps with numbers and icons', async () => {
     setUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1');
     const user = renderApp();
-    await user.click(screen.getByRole('button', { name: /Install aplikasi/ }));
+    await user.click(screen.getByRole('button', { name: /install aplikasi/i }));
 
-    const dialog = screen.getByRole('dialog', { name: /Install aplikasi/ });
+    const dialog = screen.getByRole('dialog', { name: /install aplikasi/i });
     const steps = within(dialog).getAllByRole('listitem');
     expect(steps).toHaveLength(LANG.id.installGuide['ios-safari'].steps.length);
 
@@ -163,9 +163,9 @@ describe('iOS install guide', () => {
   it('sends a non-Safari iOS browser to Safari first', async () => {
     setUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 CriOS/120 Mobile/15E148 Safari/604.1');
     const user = renderApp();
-    await user.click(screen.getByRole('button', { name: /Install aplikasi/ }));
+    await user.click(screen.getByRole('button', { name: /install aplikasi/i }));
 
-    const dialog = screen.getByRole('dialog', { name: /Install aplikasi/ });
+    const dialog = screen.getByRole('dialog', { name: /install aplikasi/i });
     expect(within(dialog).getByText(/Buka Safari/)).toBeTruthy();
   });
 
@@ -179,10 +179,10 @@ describe('iOS install guide', () => {
       userChoice: Promise.resolve({ outcome: 'accepted' }),
     }));
 
-    await user.click(screen.getByRole('button', { name: /Install aplikasi/ }));
+    await user.click(screen.getByRole('button', { name: /install aplikasi/i }));
     expect(prompt).toHaveBeenCalled();
     // No guide needed: the browser handled it.
-    expect(screen.queryByRole('dialog', { name: /Install aplikasi/ })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: /install aplikasi/i })).toBeNull();
   });
 
   it('keeps both languages of the guide in step', () => {

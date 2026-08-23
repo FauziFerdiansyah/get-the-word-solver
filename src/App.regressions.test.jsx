@@ -233,7 +233,7 @@ describe('install progress', () => {
       userChoice: Promise.resolve({ outcome: 'accepted' }),
     }));
 
-    await user.click(screen.getByRole('button', { name: /Install aplikasi/ }));
+    await user.click(screen.getByRole('button', { name: /install aplikasi/i }));
 
     const dialog = await screen.findByRole('dialog', { name: /Menyiapkan aplikasi|Aplikasi siap/ });
     const bar = within(dialog).getByRole('progressbar');
@@ -259,7 +259,7 @@ describe('install progress', () => {
       userChoice: Promise.resolve({ outcome: 'dismissed' }),
     }));
 
-    await user.click(screen.getByRole('button', { name: /Install aplikasi/ }));
+    await user.click(screen.getByRole('button', { name: /install aplikasi/i }));
     expect(screen.queryByRole('progressbar')).toBeNull();
   });
 });
@@ -278,8 +278,8 @@ describe('iOS guide copy button', () => {
     // userEvent.setup() installs its own clipboard stub, so the copied value is
     // read back from it rather than through a spy of our own.
     const user = renderApp();
-    await user.click(screen.getByRole('button', { name: /Install aplikasi/ }));
-    const dialog = screen.getByRole('dialog', { name: /Install aplikasi/ });
+    await user.click(screen.getByRole('button', { name: /install aplikasi/i }));
+    const dialog = screen.getByRole('dialog', { name: /install aplikasi/i });
 
     const steps = within(dialog).getAllByRole('listitem');
     const buttons = steps.flatMap((li) => [...li.querySelectorAll('button')]);

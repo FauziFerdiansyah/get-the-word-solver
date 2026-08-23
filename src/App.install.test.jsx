@@ -122,7 +122,7 @@ describe('install button', () => {
 
   it('stays hidden until the browser says the app can be installed', () => {
     renderApp();
-    expect(screen.queryByRole('button', { name: /Install aplikasi/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /install aplikasi/i })).toBeNull();
   });
 
   it('appears once beforeinstallprompt fires', () => {
@@ -132,6 +132,6 @@ describe('install button', () => {
 
     // The default action has to be cancelled or Chrome shows its own mini-bar.
     expect(event.preventDefault).toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: /Install aplikasi/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /install aplikasi/i })).toBeTruthy();
   });
 });

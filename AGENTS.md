@@ -37,9 +37,43 @@ Bump checklist:
 1. `package.json` → `version`
 2. `public/sw.js` → `CACHE_NAME` (must change, or returning visitors keep the old
    bundle — this is a static file Vite does not process, so it is manual)
-3. `CHANGELOG.md` → new entry at the top, newest first
+3. `CHANGELOG.md` → **required**, see below
 4. `docs/SESSIONS.md` → append what was done and why
 5. Bump `docs/*` `Version:` headers only when that document's content changed
+
+### The changelog entry is not optional
+
+**Every version bump ships with a `CHANGELOG.md` entry.** The app reads that file
+directly — `src/data/changelog.js` imports it with `?raw` and the Settings sheet
+renders it under "Riwayat Versi" — so a missing or malformed entry is a visible
+product defect, not just untidy history. Tests fail if the newest entry does not
+match `package.json`.
+
+Format, which the parser depends on:
+
+```markdown
+## 2.9.0 — 2026-08-23
+
+### Added
+
+- What a user can now do that they could not before.
+
+### Changed
+
+- What behaves differently, and why it was worth changing.
+
+### Fixed
+
+- The defect, in terms of what the user saw.
+```
+
+- `## <version> — <YYYY-MM-DD>`, newest first. The em dash separates them.
+- Section headings are `### Added`, `### Changed`, `### Fixed`, or
+  `### Changed (breaking)`. Anything else renders without an icon.
+- Bullets only. `**bold**`, `` `code` `` and links are stripped when rendered, so
+  use them for the file's readability, not to carry meaning.
+- Write for the person using the app, not for the diff: name the symptom that is
+  gone, not the function that changed.
 
 The version shown in Settings comes from `package.json` through the
 `__APP_VERSION__` define in [vite.config.js](vite.config.js). Never hardcode it.

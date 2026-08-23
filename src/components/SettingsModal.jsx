@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { playTestSound, getAudioState } from '../utils/sound';
 import SessionManager from './SessionManager';
+import ChangelogModal from './ChangelogModal';
 import { THEMES } from '../data/themes';
 import { gooeyToast } from 'goey-toast';
 
@@ -10,6 +11,7 @@ const themeKeys = Object.keys(THEMES);
 
 export default function SettingsModal({ open, onClose, snapshot, onRestoreSession }) {
   const [showSessions, setShowSessions] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
   const {
     theme, themeName, setThemeName, darkMode, setDarkMode,
     soundEnabled, setSoundEnabled, showDefinition, setShowDefinition,
@@ -229,6 +231,8 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
           </div>
         )}
 
+        {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
+
         {showSessions && (
           <SessionManager
             snapshot={snapshot}
@@ -420,9 +424,20 @@ export default function SettingsModal({ open, onClose, snapshot, onRestoreSessio
             <Icon icon="tabler:external-link" width={16} className="ml-auto shrink-0" style={{ color: theme.textMuted }} />
           </a>
 
-          <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.textMuted }}>
-            {t.appTitle} v{__APP_VERSION__}
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: theme.textMuted }}>
+              {t.appTitle} v{__APP_VERSION__}
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowChangelog(true)}
+              className="flex items-center gap-1.5 rounded-lg border-2 px-3 py-2 text-xs font-bold active:translate-x-[1.5px] active:translate-y-[1.5px] transition-all touch-manipulation"
+              style={{ backgroundColor: theme.card, borderColor: theme.border, color: theme.text, boxShadow: `2px 2px 0px 0px ${theme.shadow}` }}
+            >
+              <Icon icon="tabler:history" width={14} />
+              {t.changelog}
+            </button>
+          </div>
         </div>
       </div>
     </div>

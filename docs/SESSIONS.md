@@ -5,6 +5,27 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.9.0
+
+- **In-app changelog.** `src/data/changelog.js` imports `CHANGELOG.md` with Vite's
+  `?raw` and parses the subset of Markdown the file uses. Chosen over a hand-kept
+  data file so the two cannot drift; a test compares the parsed versions against
+  the file's `##` headings and against `package.json`.
+- **AGENTS.md** now states the changelog entry is required and documents the format
+  the parser depends on. It is a product surface, so a malformed entry is a
+  visible defect.
+- **1.x history reconstructed** from `git log --reverse`. The version stayed at
+  1.0.0 through all of it, so the numbers are assigned after the fact — the
+  changelog says so rather than implying those releases existed.
+- **Tier tab flicker** was rows keyed by word: every switch unmounted ten `<li>`
+  and mounted ten more. Keyed by position now. That reuses the DOM node for a
+  different word, so `WordItem` stores its definition alongside the word it
+  belongs to and resets during render when they disagree — otherwise a reused row
+  would briefly show the previous word's definition.
+- Install button, empty state and copy control restyled.
+
+---
+
 ## 2026-08-23 — v2.8.0
 
 Sessions reworked into a popup after the first version was a block inside the

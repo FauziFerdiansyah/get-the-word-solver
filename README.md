@@ -25,6 +25,7 @@ A lightweight, mobile-first web app to help you find answers for **Get The Word!
 - **Mechanical key sounds** — a real Cherry MX Blue recording per letter, 62 kB for all 26, with a synthesised fallback and a "Test" button in Settings
 - **High contrast mode** — true black (#000) for AMOLED screens, clean white in light mode
 - **Hideable hints** — switch the explanations off once you know the app
+- **In-app version history** — every release note, read straight from CHANGELOG.md
 - **Random word** — drawn from the words currently matching your clues, common tier first
 - **Saved sessions** — keep a puzzle you are working on and reopen it later, with a preview and the exact time it was saved; stored on your device
 - **Coach mark tutorial** — step-by-step guide for first-time users
@@ -154,6 +155,7 @@ get-the-word-solver/
 │   │   ├── ResultsList.jsx       # ranked suggestions, tier tabs, copy
 │   │   ├── SettingsModal.jsx     # themes, language, sound, toggles
 │   │   ├── SessionManager.jsx    # sessions popup: save / open / delete
+│   │   ├── ChangelogModal.jsx    # version history, parsed from CHANGELOG.md
 │   │   ├── CoachMark.jsx         # 8-step walkthrough
 │   │   ├── RandomWordModal.jsx   # dice, drawn from the current answers
 │   │   ├── ConfirmModal.jsx      # reset / level-change confirmation

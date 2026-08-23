@@ -10,16 +10,20 @@ const COPY_LIMIT = 20;
 function WordItem({ word, order, showDefinition, lang, tier }) {
   const { theme, t } = useTheme();
   // Seeded from the cache so a word that already has a definition renders it on
-  // the first paint. Without this, remounting a word (which is what switching
-  // result tabs does) painted it with no definition and then grew once the
-  // promise resolved — read as flicker.
-  const [def, setDef] = useState(() => getCachedDefinition(word, lang) ?? null);
+  // the first paint instead of growing a moment later.
+  //
+  // The definition is stored with the word it belongs to: rows are keyed by
+  // position so the DOM node is reused when the tier changes, and without this
+  // the previous word's definition would show under the new word for a tick.
+  const [entry, setEntry] = useState(() => ({ word, def: getCachedDefinition(word, lang) ?? null }));
+  if (entry.word !== word) setEntry({ word, def: getCachedDefinition(word, lang) ?? null });
+  const def = entry.def;
 
   useEffect(() => {
     if (!showDefinition) return undefined;
     let cancelled = false;
     getDefinition(word, lang).then((result) => {
-      if (!cancelled) setDef(result);
+      if (!cancelled) setEntry({ word, def: result });
     });
     return () => { cancelled = true; };
   }, [word, showDefinition, lang]);
@@ -61,10 +65,15 @@ function WordItem({ word, order, showDefinition, lang, tier }) {
         </span>
         <button
           onClick={handleCopy}
-          className="p-2 -mr-1 rounded-lg active:scale-90 transition-transform shrink-0 touch-manipulation"
+          className="w-9 h-9 rounded-lg border-2 flex items-center justify-center shrink-0 active:translate-x-[1.5px] active:translate-y-[1.5px] transition-all touch-manipulation"
+          style={{
+            backgroundColor: theme.card,
+            borderColor: theme.border,
+            boxShadow: `2px 2px 0px 0px ${theme.shadow}`,
+          }}
           aria-label={`${t.copyWord} ${word}`}
         >
-          <Icon icon="tabler:copy" width={16} style={{ color: theme.textMuted }} />
+          <Icon icon="tabler:copy" width={16} style={{ color: theme.text }} />
         </button>
       </div>
       {showDefinition && def && (
@@ -118,16 +127,23 @@ export default function ResultsList({
   if (totalResults === 0) {
     return (
       <div
-        className="rounded-xl border-2 p-4 flex items-center gap-3 text-sm font-semibold"
+        className="rounded-xl border-2 px-4 py-8 flex flex-col items-center text-center gap-3"
         style={{
           backgroundColor: theme.accent2,
-          borderColor: theme.red,
-          color: theme.text,
+          borderColor: theme.border,
           boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
         }}
       >
-        <Icon icon="tabler:mood-empty" width={22} style={{ color: theme.red }} className="shrink-0" />
-        <span>
+        <span
+          className="w-16 h-16 rounded-2xl border-2 flex items-center justify-center"
+          style={{ backgroundColor: theme.card, borderColor: theme.border }}
+        >
+          <Icon icon="tabler:mood-empty" width={34} style={{ color: theme.red }} />
+        </span>
+        <span className="text-sm font-extrabold" style={{ color: theme.text }}>
+          {t.noMatchTitle}
+        </span>
+        <span className="text-xs leading-relaxed max-w-[20rem]" style={{ color: theme.textMuted }}>
           {conflicts.length > 0
             ? `${conflicts.join(', ')} ${t.conflictLetters}`
             : t.noMatch}
@@ -198,10 +214,12 @@ export default function ResultsList({
         })}
       </div>
 
+      {/* Keyed by position, not by word: keying by word made every tier switch
+          unmount the entire list and mount a fresh one, which read as a flash. */}
       <ul className="flex flex-col gap-2">
         {visibleResults.map((word, index) => (
           <WordItem
-            key={word}
+            key={index}
             word={word}
             order={index + 1}
             showDefinition={showDefinition}

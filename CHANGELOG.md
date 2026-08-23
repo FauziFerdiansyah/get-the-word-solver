@@ -4,6 +4,34 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.9.0 — 2026-08-23
+
+### Added
+
+- **Version history in the app**, under the version line in Settings. It reads
+  `CHANGELOG.md` itself, so the file and the popup can never disagree, and marks
+  which entry is the version you are running.
+- Reconstructed the 1.0.0–1.4.0 entries from commit history; the version in
+  `package.json` never moved during that work, so those numbers are assigned
+  after the fact.
+
+### Changed
+
+- The install button is capitalised, full width, the same height as the buttons
+  around it, and filled with the theme's primary colour instead of the muted
+  accent that made it look secondary.
+- The empty-results panel is now a centred icon with a heading and an explanation,
+  rather than a single line of text in a warning strip.
+- The copy control on each suggestion looks like a button: bordered, shadowed, and
+  a 36px target instead of a bare icon.
+
+### Fixed
+
+- Switching between the Semua / Umum / Jarang tabs flashed the whole list. Rows
+  were keyed by word, so every switch unmounted all of them and mounted new ones;
+  they are keyed by position now and the same DOM nodes are reused. Each row keeps
+  its definition tied to its word so a reused row cannot show the previous one's.
+
 ## 2.8.0 — 2026-08-23
 
 ### Changed
@@ -236,7 +264,59 @@ incompatibly.
 - Switching tier animated and resized the tab row, which read as flicker.
 - A crossed-out letter silently discarded the whole yellow box.
 
-## 1.0.0
+## 1.4.0 — 2026-07-03
+
+### Fixed
+
+- Keyboard keys were too small on an iPad; enlarged at the `md` breakpoint.
+
+## 1.3.0 — 2026-07-03
+
+### Changed
+
+- Word database expanded across A–Z for all three lengths, after an earlier pass
+  that only covered S-patterns.
+- Duplicates removed and entries of the wrong length dropped.
+- `NEWS` added along with a suffix whitelist, so real words ending in -S stop
+  being treated as plurals.
+- Translation handling improved and the random word modal reworked.
+
+### Fixed
+
+- The random word modal's shuffle animation never ran, from a `useEffect`
+  dependency mistake.
+
+## 1.2.0 — 2026-07-02
+
+### Fixed
+
+- Duplicate letters with mixed green/yellow states were mishandled by the solver.
+- Yellow letters did not properly exclude their own position.
+- `SAILS` and `SALTS` were missing.
+
+### Changed
+
+- The category indicator moved to the top-left of a word and took the tab colours.
+
+## 1.1.0 — 2026-07-02
+
+### Added
+
+- Word definitions from the Free Dictionary API, copy-to-clipboard, the random
+  word picker, and the first-run coach mark.
+- Indonesian/English switching, with every string moved into `i18n.js`.
+- Common/rare word categories with visual indicators.
+- PWA setup: manifest, service worker, and the version display in Settings.
+- SEO and social metadata; the emoji language flags became icon images.
+
+## 1.0.0 — 2026-07-02
 
 Initial release: single-row clue input, virtual keyboard, common/rare word
 categories, 6 themes, dark mode, Indonesian/English, PWA scaffolding.
+
+---
+
+*Versions 1.0.0 to 1.4.0 are reconstructed from commit history. The version in
+`package.json` stayed at 1.0.0 through all of that work, so these numbers are
+assigned after the fact to group what shipped. Everything from 2.0.0 onward was
+versioned as it was released.*

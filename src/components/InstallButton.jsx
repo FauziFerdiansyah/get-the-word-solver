@@ -64,11 +64,11 @@ export default function InstallButton() {
       <button
         type="button"
         onClick={handleClick}
-        className="flex items-center justify-center gap-2 rounded-xl border-2 py-2.5 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] touch-manipulation"
+        className="w-full flex items-center justify-center gap-2 rounded-xl border-2 py-3 text-sm font-bold transition-all active:translate-x-[1.5px] active:translate-y-[1.5px] touch-manipulation"
         style={{
-          backgroundColor: theme.accent,
+          backgroundColor: theme.btnPrimary,
           borderColor: theme.border,
-          color: theme.text,
+          color: '#1e293b',
           boxShadow: `3px 3px 0px 0px ${theme.shadow}`,
         }}
       >

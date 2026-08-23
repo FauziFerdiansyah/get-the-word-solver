@@ -46,7 +46,7 @@ describe('coach mark content', () => {
     expect(text).toMatch(/6 Baris/);
     expect(text).toMatch(/#1/);
     expect(text).toMatch(/Isi Clue.*Jawaban|Jawaban/);
-    expect(text).toMatch(/Install aplikasi/);
+    expect(text).toMatch(/install aplikasi/i);
     expect(text).not.toMatch(/Cari Jawaban/); // the search button is gone
     expect(text).not.toMatch(/"AA"/); // so is the duplicate-letter encoding
   });
