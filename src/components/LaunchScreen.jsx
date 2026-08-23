@@ -48,7 +48,7 @@ export default function LaunchScreen() {
       <img
         src="./icon-512.png"
         alt=""
-        className="w-32 h-32 sm:w-40 sm:h-40 rounded-full"
+        className="w-32 h-32 sm:w-40 sm:h-40"
         style={{ animation: 'launch-pop 420ms ease-out' }}
       />
     </div>

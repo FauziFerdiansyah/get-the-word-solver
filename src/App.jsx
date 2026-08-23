@@ -37,7 +37,9 @@ export default function App() {
   const [clueStates, setClueStates] = useState(() => emptyStates(5));
   const [excluded, setExcluded] = useState(emptyClues(5));
   const [board, setBoard] = useState(() => emptyBoard(5));
-  const [disabledLetters, setDisabledLetters] = useState(new Set());
+  // The two modes share nothing: resetting the board must not disturb the clue
+  // row, so even the crossed-out letters are kept per mode.
+  const [disabledByMode, setDisabledByMode] = useState({ single: new Set(), board: new Set() });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [pendingLength, setPendingLength] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -45,17 +47,22 @@ export default function App() {
   const [showRandom, setShowRandom] = useState(false);
   const [category, setCategory] = useState('all'); // 'common', 'rare', or 'all'
   const [mobileView, setMobileView] = useState('input'); // phone only: 'input' | 'results'
+  const [pendingReset, setPendingReset] = useState(false);
+
+  const disabledLetters = disabledByMode[mode];
 
   // Reading the cap instead of trimming state keeps one source of truth: turning
   // the setting off hides the extra letters without destroying them.
   const maxExcluded = multiExcluded ? MAX_EXCLUDED : 1;
 
-  const boardHasLetters = board.some((row) => row.letters.some((l) => l !== ''));
-  const hasFilledFields =
-    clues.some((c) => c !== '') ||
-    excluded.some((c) => c !== '') ||
-    boardHasLetters ||
-    disabledLetters.size > 0;
+  const singleFilled =
+    clues.some((c) => c !== '') || excluded.some((c) => c !== '') || disabledByMode.single.size > 0;
+  const boardFilled =
+    board.some((row) => row.letters.some((l) => l !== '')) || disabledByMode.board.size > 0;
+  // What the active mode has, for the results and the reset button…
+  const hasFilledFields = mode === 'board' ? boardFilled : singleFilled;
+  // …and what either mode has, for the level-change warning.
+  const anythingFilled = singleFilled || boardFilled;
 
   // Suggestions are recomputed on every change — no need to press a button.
   const results = useMemo(() => {
@@ -86,6 +93,16 @@ export default function App() {
 
   const resultCount = results.common.length + results.rare.length;
 
+  // Once there are matches, the dice should pick from them — common tier first,
+  // since that is where a real answer almost always sits. It falls back to the
+  // best-ranked words of the level when nothing has been entered yet.
+  const RANDOM_POOL = 30;
+  const randomWords = (() => {
+    if (results.common.length > 0) return results.common.slice(0, RANDOM_POOL);
+    if (results.rare.length > 0) return results.rare.slice(0, RANDOM_POOL);
+    return getTopWords(wordLength);
+  })();
+
   // A letter cannot be absent and present at once. When that happens the result
   // list is empty for a reason the user cannot see, so name the letters.
   const conflicts = useMemo(() => {
@@ -106,23 +123,36 @@ export default function App() {
     return [...present].filter((letter) => disabledLetters.has(letter));
   }, [mode, board, clues, clueStates, excluded, disabledLetters]);
 
-  const clearInputs = (length) => {
+  // Changing word length has to clear both models, since the box counts change.
+  const clearEverything = (length) => {
     setClues(emptyClues(length));
     setClueStates(emptyStates(length));
     setExcluded(emptyClues(length));
     setBoard(emptyBoard(length));
-    setDisabledLetters(new Set());
+    setDisabledByMode({ single: new Set(), board: new Set() });
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  // Reset only touches the mode you are looking at.
+  const clearActiveMode = () => {
+    if (mode === 'board') setBoard(emptyBoard(wordLength));
+    else {
+      setClues(emptyClues(wordLength));
+      setClueStates(emptyStates(wordLength));
+      setExcluded(emptyClues(wordLength));
+    }
+    setDisabledByMode((prev) => ({ ...prev, [mode]: new Set() }));
     setVisibleCount(PAGE_SIZE);
   };
 
   const applyLevelChange = (length) => {
     setWordLength(length);
-    clearInputs(length);
+    clearEverything(length);
   };
 
   const handleSelectLevel = (length) => {
     if (length === wordLength) return;
-    if (hasFilledFields) {
+    if (anythingFilled) {
       setPendingLength(length);
     } else {
       applyLevelChange(length);
@@ -222,18 +252,25 @@ export default function App() {
   };
 
   const handleToggleLetter = (letter) => {
-    setDisabledLetters((prev) => {
-      const next = new Set(prev);
+    setDisabledByMode((prev) => {
+      const next = new Set(prev[mode]);
       if (next.has(letter)) next.delete(letter);
       else next.add(letter);
-      return next;
+      return { ...prev, [mode]: next };
     });
     setVisibleCount(PAGE_SIZE);
   };
 
+  // 4. Reset throws work away, so it asks first whenever there is work to lose.
   const handleReset = () => {
-    clearInputs(wordLength);
+    if (hasFilledFields) setPendingReset(true);
+    else applyReset();
+  };
+
+  const applyReset = () => {
+    clearActiveMode();
     setCategory('all');
+    setPendingReset(false);
   };
 
   const handleShowMore = () => setVisibleCount((prev) => prev + PAGE_SIZE);
@@ -415,9 +452,16 @@ export default function App() {
 
       <ConfirmModal
         open={pendingLength !== null}
-        message={t.confirmReset}
+        message={t.confirmLevelChange}
         onConfirm={confirmLevelChange}
         onCancel={cancelLevelChange}
+      />
+
+      <ConfirmModal
+        open={pendingReset}
+        message={mode === 'board' ? t.confirmResetBoard : t.confirmResetClues}
+        onConfirm={applyReset}
+        onCancel={() => setPendingReset(false)}
       />
 
       <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
@@ -426,7 +470,8 @@ export default function App() {
         <RandomWordModal
           onClose={() => setShowRandom(false)}
           wordLength={wordLength}
-          words={getTopWords(wordLength)}
+          words={randomWords}
+          fromResults={resultCount > 0}
         />
       )}
     </div>

@@ -4,6 +4,31 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.6.0 — 2026-08-23
+
+### Changed
+
+- **Icons are square again**, regenerated from the square logo instead of the
+  circular one. The maskable copy stays inside Android's centre-80% safe zone, and
+  the launch screen shows a square icon. Note the launcher, not the app, decides
+  whether it masks that square into a circle or a squircle.
+- **The two input modes share nothing.** Reset clears only the mode you are
+  looking at, and each mode keeps its own crossed-out letters. Changing the word
+  length still clears both, since the number of boxes changes.
+- **Reset asks first** whenever the current mode has something in it, naming which
+  mode it is about to empty.
+- **Random word draws from the current answers**, common tier first, falling back
+  to the level's best-ranked words when no clue has been entered. The modal says
+  which pool it drew from.
+
+### Fixed
+
+- The install progress bar filled instantly because it counted files, not bytes,
+  and then sat still during the second or two the OS spends installing. It now
+  re-downloads each file (bypassing the HTTP cache) and reports the megabytes
+  moved for 90% of the bar, then waits for the `appinstalled` event for the last
+  stretch — shown as a moving stripe, because that part genuinely has no size.
+
 ## 2.5.0 — 2026-08-23
 
 ### Fixed

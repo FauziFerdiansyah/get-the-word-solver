@@ -216,13 +216,16 @@ describe('install progress', () => {
       else original(type, fn, opts);
     });
     window.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {} });
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: true, clone: () => ({}) })));
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
+      ok: true,
+      clone: () => ({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(2048)) }),
+    })));
     vi.stubGlobal('caches', { open: () => Promise.resolve({ put: () => Promise.resolve() }) });
   });
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('reports real file counts, not a fake timer', async () => {
+  it('measures real downloads, then waits on the OS for the rest', async () => {
     const user = renderApp();
     act(() => handlers.beforeinstallprompt({
       preventDefault: vi.fn(),
@@ -234,9 +237,17 @@ describe('install progress', () => {
 
     const dialog = await screen.findByRole('dialog', { name: /Menyiapkan aplikasi|Aplikasi siap/ });
     const bar = within(dialog).getByRole('progressbar');
-    // Every step of the bar corresponds to a file that was actually fetched.
-    await waitFor(() => expect(bar.getAttribute('aria-valuenow')).toBe('100'));
+
+    // Downloading owns 90% of the bar and every step is a file really fetched.
+    await waitFor(() => expect(bar.getAttribute('aria-valuenow')).toBe('90'));
     expect(window.fetch.mock.calls.length).toBeGreaterThan(5);
+    // Each fetch bypasses the HTTP cache, so the bytes are genuinely moved.
+    expect(window.fetch.mock.calls[0][1]).toEqual({ cache: 'reload' });
+    expect(within(dialog).getByText(/Menyelesaikan pemasangan/)).toBeTruthy();
+
+    // The last stretch closes only when the OS says the install is done.
+    act(() => handlers.appinstalled());
+    await waitFor(() => expect(bar.getAttribute('aria-valuenow')).toBe('100'));
     expect(within(dialog).getByText(/Aplikasi siap/)).toBeTruthy();
   });
 

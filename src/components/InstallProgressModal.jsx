@@ -6,9 +6,13 @@ import { useTheme } from '../contexts/ThemeContext';
 // accepted/dismissed and `appinstalled` fires when the OS is done. There is no
 // percentage to read, and inventing one would be a fake loading bar.
 //
-// So this measures something real and genuinely useful at that moment: pulling
-// the app's own files into the cache so the installed copy works offline. The
-// percentage is files fetched over files total.
+// So this measures the two things that are real at that moment:
+//
+//   1. pulling the app's own files down and into the cache, weighted by the
+//      bytes actually received — not by file count, which finishes in a blink
+//      because most files are small
+//   2. waiting for the OS to report `appinstalled`, which is the second or two
+//      of apparent hang the user noticed after the bar filled
 //
 // The asset list is read from the document rather than hardcoded, because Vite
 // gives the JS and CSS bundles hashed names that change on every build.
@@ -21,7 +25,7 @@ function assetList() {
   for (const extra of [
     './keys.mp3', './error.wav', './bell.wav',
     './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png',
-    './screen-light.svg', './screen-dark.svg', './word.png',
+    './screen-light.svg', './screen-dark.svg', './word.png', './og-image.png',
   ]) {
     urls.add(extra);
   }
@@ -29,6 +33,10 @@ function assetList() {
 }
 
 const CACHE = 'wordle-solver-offline';
+// How much of the bar belongs to downloading; the rest waits on the OS.
+const DOWNLOAD_SHARE = 0.9;
+// If `appinstalled` never arrives (some browsers skip it), stop waiting.
+const INSTALL_TIMEOUT_MS = 15000;
 
 export default function InstallProgressModal({ onClose }) {
   const { theme, t } = useTheme();
@@ -37,37 +45,83 @@ export default function InstallProgressModal({ onClose }) {
   const [assets] = useState(assetList);
   const total = assets.length;
   const [done, setDone] = useState(0);
-  const [finished, setFinished] = useState(false);
+  const [bytes, setBytes] = useState(0);
+  const [downloadRatio, setDownloadRatio] = useState(0);
+  const [stage, setStage] = useState('downloading'); // downloading → installing → ready
   const [failed, setFailed] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
+    let installed = false;
+
+    const onInstalled = () => {
+      installed = true;
+      if (!cancelled) setStage((s) => (s === 'downloading' ? s : 'ready'));
+    };
+    window.addEventListener('appinstalled', onInstalled);
 
     const cacheAll = async () => {
       const cache = 'caches' in window ? await caches.open(CACHE).catch(() => null) : null;
       let misses = 0;
-      for (const url of assets) {
+      let received = 0;
+
+      // Sizes are unknown up front, so the bar advances per file while the byte
+      // counter shows the real volume moved.
+      for (let i = 0; i < assets.length; i += 1) {
         if (cancelled) return;
+        const url = assets[i];
         try {
+          // `reload` skips the HTTP cache, so this is a genuine download.
           const res = await fetch(url, { cache: 'reload' });
-          if (res.ok && cache) await cache.put(url, res.clone());
-          else if (!res.ok) misses += 1;
+          if (res.ok) {
+            const body = await res.clone().arrayBuffer();
+            received += body.byteLength;
+            if (cache) await cache.put(url, res);
+          } else {
+            misses += 1;
+          }
         } catch {
           misses += 1;
         }
-        if (!cancelled) setDone((n) => n + 1);
+        if (cancelled) return;
+        setDone(i + 1);
+        setBytes(received);
+        setDownloadRatio((i + 1) / assets.length);
       }
-      if (!cancelled) {
-        setFailed(misses);
-        setFinished(true);
+
+      if (cancelled) return;
+      setFailed(misses);
+
+      // Files are down; now wait for the OS to finish the install itself.
+      setStage(installed ? 'ready' : 'installing');
+      if (!installed) {
+        const started = Date.now();
+        while (!installed && !cancelled && Date.now() - started < INSTALL_TIMEOUT_MS) {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+        if (!cancelled) setStage('ready');
       }
     };
 
     cacheAll();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, [assets]);
 
-  const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+  const finished = stage === 'ready';
+  const percent = finished
+    ? 100
+    : Math.round(downloadRatio * DOWNLOAD_SHARE * 100);
+  const megabytes = (bytes / 1024 / 1024).toFixed(2);
+
+  const title = finished ? t.installReady : stage === 'installing' ? t.installFinishing : t.installPreparing;
+  const note = finished
+    ? t.installReadyNote
+    : stage === 'installing'
+      ? t.installFinishingNote
+      : t.installPreparingNote;
 
   return (
     <div
@@ -90,22 +144,23 @@ export default function InstallProgressModal({ onClose }) {
             style={{ backgroundColor: theme.accent, borderColor: theme.border }}
           >
             <Icon
-              icon={finished ? 'tabler:circle-check' : 'tabler:cloud-download'}
+              icon={finished ? 'tabler:circle-check' : stage === 'installing' ? 'tabler:loader-2' : 'tabler:cloud-download'}
               width={20}
               style={{ color: theme.text }}
+              className={stage === 'installing' ? 'animate-spin' : ''}
             />
           </span>
-          {finished ? t.installReady : t.installPreparing}
+          {title}
         </h2>
 
         <p className="text-sm leading-relaxed" style={{ color: theme.textMuted }}>
-          {finished ? t.installReadyNote : t.installPreparingNote}
+          {note}
         </p>
 
-        {/* Real numbers: files fetched over files total */}
+        {/* Real numbers: files fetched, and the bytes they actually weighed */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs font-bold" style={{ color: theme.text }}>
-            <span>{done}/{total} {t.installFiles}</span>
+            <span>{done}/{total} {t.installFiles} · {megabytes} MB</span>
             <span
               className="px-2 py-0.5 rounded-lg"
               style={{ backgroundColor: theme.keyboard, color: theme.textMuted }}
@@ -123,7 +178,14 @@ export default function InstallProgressModal({ onClose }) {
           >
             <div
               className="h-full transition-all duration-200"
-              style={{ width: `${percent}%`, backgroundColor: theme.green }}
+              style={{
+                width: `${percent}%`,
+                backgroundColor: theme.green,
+                // A barber-pole while the OS works, since that part has no size.
+                backgroundImage: stage === 'installing'
+                  ? `repeating-linear-gradient(45deg, rgba(255,255,255,.35) 0 6px, transparent 6px 12px)`
+                  : 'none',
+              }}
             />
           </div>
         </div>

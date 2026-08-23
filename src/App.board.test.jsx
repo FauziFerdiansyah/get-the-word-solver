@@ -99,7 +99,9 @@ describe('board mode', () => {
     await fillRow(user, 1, 'CRANE', 'gxxxx');
     expect(resultItems().length).toBeGreaterThan(0);
 
+    // Reset asks first now, so a stray tap cannot wipe the board.
     await user.click(screen.getByRole('button', { name: 'Reset' }));
+    await user.click(screen.getByRole('button', { name: 'Ya, Reset' }));
 
     expect(resultItems()).toHaveLength(0);
     expect(screen.getByLabelText('Baris 1, kotak 1').value).toBe('');

@@ -5,6 +5,31 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.6.0
+
+- **Square icons.** Regenerated everything from `word-large.png` rather than
+  `word-circle.png`. Worth knowing: a PWA cannot force the icon's outline. A
+  `purpose: maskable` icon is cropped to whatever shape the launcher uses, so the
+  only thing under our control is keeping the artwork square and inside the
+  centre-80% safe zone. `word-circle.png` is now unused.
+- **Mode isolation.** `disabledLetters` became `disabledByMode` — keyed by mode,
+  with the active set derived. Reset clears only the active mode; level change
+  still clears both because the box count changes.
+- **Reset confirmation** reuses ConfirmModal, with a message naming the mode.
+  `confirmReset` was split into `confirmLevelChange` / `confirmResetClues` /
+  `confirmResetBoard`.
+- **Random word** now draws from the top 30 common matches, then rare, then the
+  level's top words. Its test computes the expected pool from the solver instead
+  of reading the DOM, which only shows the first page of ten.
+- **Install progress made honest.** It counted files, so it hit 100% instantly and
+  then appeared frozen while the OS worked. Now: fetches with `cache: 'reload'`
+  so bytes really move, reports megabytes, gives downloading 90% of the bar, and
+  holds the last 10% until `appinstalled` fires (15 s cap, since some browsers
+  never send it). That stretch shows a stripe rather than a number, because it has
+  no measurable size.
+
+---
+
 ## 2026-08-23 — v2.5.0
 
 Field report with two real logic bugs in it.

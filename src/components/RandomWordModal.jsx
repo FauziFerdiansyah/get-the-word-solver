@@ -9,7 +9,7 @@ const AUTO_CLOSE_MS = 8000;
 // Mounted only while open, so every appearance starts a fresh draw.
 // `words` is expected to be the top-ranked slice for the level, which keeps the
 // draw on words that actually turn up in the game.
-export default function RandomWordModal({ onClose, words, wordLength }) {
+export default function RandomWordModal({ onClose, words, wordLength, fromResults = false }) {
   const { theme, t } = useTheme();
   const pool = useMemo(
     () => (words || []).filter((w) => w.length === wordLength),
@@ -114,7 +114,7 @@ export default function RandomWordModal({ onClose, words, wordLength }) {
         </div>
 
         <p className="text-[10px] text-center" style={{ color: theme.textMuted }}>
-          {shuffling ? '🎲 ...' : t.randomHint}
+          {shuffling ? '🎲 ...' : fromResults ? t.randomFromResults : t.randomHint}
         </p>
       </div>
     </div>
