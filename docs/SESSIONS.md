@@ -5,6 +5,29 @@ next agent would otherwise rediscover the hard way.
 
 ---
 
+## 2026-08-23 — v2.13.0
+
+SEO pass, with the requirement that a fork adapts on its own.
+
+- Vite substitutes `%VITE_SITE_URL%` inside `index.html` (verified by building
+  with a throwaway `.env` before relying on it), so canonical, Open Graph,
+  Twitter and JSON-LD all read one setting. `public/` is copied verbatim and that
+  substitution cannot reach it, hence `scripts/build-seo.mjs` generating robots.txt
+  and sitemap.xml; it is wired into `npm run build` so a deploy cannot ship a
+  sitemap pointing at the previous owner's domain.
+- Copy re-angled: Get The Word! leads everywhere, Wordle follows. A test asserts
+  the ordering inside the description rather than trusting the wording to stay.
+- `src/seo.test.js` covers one Lighthouse SEO audit per test, plus two that guard
+  the fork story: no hardcoded domain in `index.html` (one exception, the author
+  link in the structured data) and `build-seo.mjs` regenerating for an arbitrary
+  `VITE_SITE_URL`.
+- Known limitation, documented in both AGENTS.md and README: crawlers only read
+  `robots.txt` from the domain root. Under a GitHub Pages subpath the generated
+  file is ignored — it is shipped for deploys that own their root.
+- `<html lang>` was `en` while ThemeContext defaults to `id`; now `id`.
+
+---
+
 ## 2026-08-23 — v2.12.0
 
 - **The "Disalin" alert on Android** was the `title` attribute on the copy button:

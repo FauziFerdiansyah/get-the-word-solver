@@ -89,6 +89,43 @@ Output goes to the `dist/` folder, ready for static hosting.
 
 ---
 
+## 🔍 SEO
+
+Every absolute URL — canonical link, Open Graph and Twitter tags, structured data,
+`robots.txt` and `sitemap.xml` — comes from one setting. **Forked this repo? Change
+one line** in [.env](.env):
+
+```
+VITE_SITE_URL=https://your-name.github.io/your-repo/
+```
+
+Include the trailing slash. Then `npm run build`: Vite substitutes it into
+`index.html`, and `scripts/build-seo.mjs` regenerates `public/robots.txt` and
+`public/sitemap.xml` before the bundle is written, so a deploy can never ship a
+sitemap pointing at somebody else's domain.
+
+What ships for search engines:
+
+| Item | Detail |
+|---|---|
+| Title & description | Get The Word! first, Wordle second, within search-result lengths |
+| Canonical | absolute, from `VITE_SITE_URL` |
+| Robots | `index, follow` with `max-image-preview:large` |
+| Open Graph & Twitter | full tag set, square 1200×1200 logo, image alt text |
+| Structured data | `WebApplication` JSON-LD: free, `GameApplication`, `id`/`en`, feature list |
+| robots.txt & sitemap.xml | generated, sitemap referenced from robots.txt |
+| `<html lang>` | `id` by default, updated at runtime when the language changes |
+| `<noscript>` | explains the app when JavaScript is off |
+
+`src/seo.test.js` covers each of these, including that no domain is hardcoded in
+`index.html` and that the declared OG image size matches the real file.
+
+Crawlers read `robots.txt` from the **domain root** only. Under a GitHub Pages
+subpath the generated file sits inside that subpath and is ignored — it is there
+for deploys that own their root domain.
+
+---
+
 ## 📦 Deployment (GitHub Pages)
 
 This project includes a GitHub Actions workflow that auto-deploys on push to `main`.
@@ -131,7 +168,9 @@ get-the-word-solver/
 │   ├── icon-512.png
 │   ├── icon-maskable-512.png     # content inside Android's centre-80% safe zone
 │   ├── apple-touch-icon.png      # 180px, iOS home screen
-│   ├── og-image.png              # 1200×630 social preview
+│   ├── og-image.png              # 1200×1200 square social preview
+│   ├── robots.txt                # generated from VITE_SITE_URL
+│   ├── sitemap.xml               # generated from VITE_SITE_URL
 │   ├── screen-light.svg          # launch screen backgrounds
 │   ├── screen-dark.svg
 │   ├── keys.mp3                  # generated: 27 key samples in 300ms slots
@@ -189,10 +228,12 @@ get-the-word-solver/
 │   └── test-audio-mock.js        # Web Audio stand-in shared by tests
 ├── scripts/
 │   ├── build-words.mjs           # regenerates src/data/words.js
-│   └── build-key-sounds.mjs      # regenerates public/keys.mp3
+│   ├── build-key-sounds.mjs      # regenerates public/keys.mp3
+│   └── build-seo.mjs             # regenerates robots.txt + sitemap.xml
 ├── docs/
 │   ├── SRS.md / REQUIREMENTS.md / DESIGN.md / SKILLS.md / SESSIONS.md
 ├── .github/workflows/deploy.yml  # builds and deploys to GitHub Pages
+├── .env                          # VITE_SITE_URL — the only URL to change
 ├── AGENTS.md                     # rules for AI agents, versioning policy
 ├── CHANGELOG.md
 ├── index.html

@@ -4,6 +4,29 @@ Versioning follows [AGENTS.md](AGENTS.md#versioning): PATCH for small changes,
 MINOR for new capability, MAJOR when existing behaviour or a data shape changes
 incompatibly.
 
+## 2.13.0 — 2026-08-23
+
+### Added
+
+- **robots.txt and sitemap.xml**, generated from the site URL by
+  `scripts/build-seo.mjs`, which the build now runs first.
+- **Structured data** (`WebApplication` JSON-LD): free, a game helper, both
+  languages, with the feature list.
+- A `<noscript>` message explaining the app when JavaScript is off, and
+  `og:image:alt` / `twitter:image:alt` for the preview image.
+
+### Changed
+
+- **The page now reads as a Get The Word! tool first.** Title, description,
+  keywords and social copy lead with Get The Word! and mention Wordle second,
+  since only its 4–6 letter puzzles are covered here.
+- **Every absolute URL comes from `VITE_SITE_URL` in `.env`** — canonical, Open
+  Graph, Twitter, structured data, robots.txt and sitemap.xml. A fork changes that
+  one line and everything follows; nothing hardcodes a domain any more.
+- The social preview is the square logo at 1200×1200, with the declared size
+  matching the file.
+- `<html lang>` is `id`, which is the language the app actually starts in.
+
 ## 2.12.0 — 2026-08-23
 
 ### Added

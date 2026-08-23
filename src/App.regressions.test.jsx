@@ -160,7 +160,8 @@ describe('icons and splash art', () => {
 
   it('declares an OG image that really is that size', () => {
     const html = readFileSync('index.html', 'utf8');
-    const src = html.match(/og:image" content="[^"]*\/([^/"]+)"/)[1];
+    // The URL is templated (%VITE_SITE_URL%og-image.png), so take the file name.
+    const src = html.match(/og:image" content="[^"]*?([\w.-]+\.png)"/)[1];
     const width = html.match(/og:image:width" content="(\d+)"/)[1];
     const height = html.match(/og:image:height" content="(\d+)"/)[1];
     expect(realSize(src)).toBe(`${width}x${height}`);

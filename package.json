@@ -1,16 +1,17 @@
 {
   "name": "wordle-solver",
   "private": true,
-  "version": "2.12.0",
+  "version": "2.13.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/build-seo.mjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "build:words": "node scripts/build-words.mjs",
     "test": "vitest run",
-    "build:sounds": "node scripts/build-key-sounds.mjs"
+    "build:sounds": "node scripts/build-key-sounds.mjs",
+    "build:seo": "node scripts/build-seo.mjs"
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",
